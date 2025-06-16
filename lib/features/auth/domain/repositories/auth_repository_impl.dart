@@ -1,5 +1,7 @@
 // lib/features/auth/data/repositories/auth_repository_impl.dart
 
+import 'dart:developer';
+
 import 'package:faculity_app2/core/errors/exceptions.dart';
 import 'package:faculity_app2/features/auth/data/datasources/auth_remote_data_source.dart';
 
@@ -19,6 +21,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       throw Exception(e.message);
     } catch (e) {
+      log(e.toString());
       throw Exception('حدث خطأ غير معروف، يرجى المحاولة مجددًا.');
     }
   }

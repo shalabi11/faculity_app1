@@ -1,41 +1,33 @@
-// lib/features/auth/data/datasources/auth_remote_data_source.dart
-
 import 'package:dio/dio.dart';
-import 'package:faculity_app2/core/errors/exceptions.dart';
+import 'package:faculity_app2/core/utils/constant.dart';
 
+import '../../../../core/errors/exceptions.dart';
 import '../models/user_model.dart';
 
-// --- العقد ---
 abstract class AuthRemoteDataSource {
   Future<UserModel> login({required Map<String, dynamic> data});
   Future<void> register({required Map<String, dynamic> data});
 }
 
-// --- التنفيذ ---
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio dio;
-
   AuthRemoteDataSourceImpl({required this.dio});
 
   @override
   Future<UserModel> login({required Map<String, dynamic> data}) async {
     try {
       final response = await dio.post(
-        'https://college-hub-production.up.railway.app/api/login',
+        '$baseUrl/api/login', // <-- استخدام المتغير الجديد
         data: data,
         options: Options(headers: {'Accept': 'application/json'}),
       );
-
       if (response.statusCode == 200) {
         return UserModel.fromJson(response.data);
       } else {
-        throw ServerException(
-          message: 'خطأ غير متوقع. رمز الحالة: ${response.statusCode}',
-        );
+        throw ServerException(message: 'خطأ غير متوقع');
       }
     } on DioException catch (e) {
       handleDioException(e);
-      // This line is unreachable but required for type safety
       throw ServerException(message: 'خطأ في الشبكة');
     }
   }
@@ -43,13 +35,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> register({required Map<String, dynamic> data}) async {
     try {
-      // endpoint التسجيل من ملف Postman
       await dio.post(
-        'https://college-hub-production.up.railway.app/api/register',
+        '$baseUrl/api/register', // <-- استخدام المتغير الجديد
         data: data,
         options: Options(headers: {'Accept': 'application/json'}),
       );
-      // التسجيل الناجح لا يرجع بيانات مستخدم في العادة، فقط استجابة نجاح
     } on DioException catch (e) {
       handleDioException(e);
     }

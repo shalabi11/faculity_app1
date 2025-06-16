@@ -1,25 +1,27 @@
-// lib/features/auth/data/models/user_model.dart
-
 import '../../domain/entities/user.dart';
 
 class UserModel extends User {
   UserModel({
-    required int id,
-    required String name,
-    required String email,
-    required String role,
-    String? token,
-  }) : super(id: id, name: name, email: email, role: role, token: token);
+    required super.id,
+    required super.name,
+    required super.email,
+    required super.role,
+    super.token,
+    super.year,
+    super.section,
+  });
 
-  // دالة لتحويل الـ JSON القادم من الـ API إلى كائن UserModel
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // نفترض أن API تعيد هذه البيانات داخل كائن 'user'
+    final userData = json['user'];
     return UserModel(
-      // استجابة الـ API تحتوي على كائن 'user' وتوكن
-      id: json['user']['id'],
-      name: json['user']['name'],
-      email: json['user']['email'],
-      role: json['user']['role'],
+      id: userData['id'],
+      name: userData['name'],
+      email: userData['email'],
+      role: userData['role'],
       token: json['token'],
+      year: userData['year'],
+      section: userData['section'],
     );
   }
 }

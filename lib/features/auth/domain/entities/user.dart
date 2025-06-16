@@ -1,11 +1,12 @@
-// lib/features/auth/domain/entities/user.dart
-
 class User {
   final int id;
   final String name;
   final String email;
   final String role;
-  final String? token; // التوكن مهم جدًا للحفاظ عليه
+  final String? token;
+  // --- حقول مضافة ---
+  final String? year;
+  final String? section;
 
   User({
     required this.id,
@@ -13,5 +14,7 @@ class User {
     required this.email,
     required this.role,
     this.token,
+    this.year,
+    this.section,
   });
 }

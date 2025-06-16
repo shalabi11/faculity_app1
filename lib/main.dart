@@ -1,5 +1,6 @@
 // lib/main.dart
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/features/main_screen/presentation/screens/student_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 // استيراد شاشة البداية الجديدة

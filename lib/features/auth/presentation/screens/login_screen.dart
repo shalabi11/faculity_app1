@@ -2,6 +2,7 @@
 import 'package:faculity_app2/features/auth/widgets/login_header.dart';
 import 'package:faculity_app2/features/auth/widgets/role_selector_widget.dart';
 import 'package:faculity_app2/features/auth/widgets/sign_up_prompt.dart';
+import 'package:faculity_app2/features/main_screen/presentation/screens/student_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -85,6 +86,13 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocConsumer<LoginCubit, LoginState>(
       listener: (context, state) {
         if (state is LoginSuccess) {
+          // تمرير كائن المستخدم إلى الشاشة الرئيسية
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => StudentMainScreen(user: state.user),
+            ),
+            (route) => false,
+          );
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('أهلاً بك ${state.user.name}'),
