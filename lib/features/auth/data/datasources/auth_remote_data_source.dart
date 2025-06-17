@@ -1,34 +1,64 @@
 import 'package:dio/dio.dart';
+import 'package:faculity_app2/core/errors/exceptions.dart';
 import 'package:faculity_app2/core/utils/constant.dart';
+import 'package:faculity_app2/features/auth/domain/entities/user.dart';
 
-import '../../../../core/errors/exceptions.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> login({required Map<String, dynamic> data});
   Future<void> register({required Map<String, dynamic> data});
+  Future<void> logout();
+  Future<User> getUserProfile();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio dio;
-  AuthRemoteDataSourceImpl({required this.dio});
+  final FlutterSecureStorage secureStorage;
+
+  AuthRemoteDataSourceImpl({required this.dio, required this.secureStorage});
 
   @override
   Future<UserModel> login({required Map<String, dynamic> data}) async {
     try {
-      final response = await dio.post(
-        '$baseUrl/api/login', // <-- استخدام المتغير الجديد
-        data: data,
-        options: Options(headers: {'Accept': 'application/json'}),
-      );
+      final response = await dio.post('$baseUrl/api/login', data: data);
+
       if (response.statusCode == 200) {
-        return UserModel.fromJson(response.data);
+        final userModel = UserModel.fromJson(response.data);
+        if (userModel.token != null) {
+          await secureStorage.write(key: 'auth_token', value: userModel.token);
+        }
+        return userModel;
       } else {
         throw ServerException(message: 'خطأ غير متوقع');
       }
     } on DioException catch (e) {
       handleDioException(e);
+      print('====> DIO ERROR in DataSource: $e'); // <-- أضف هذا
       throw ServerException(message: 'خطأ في الشبكة');
+    }
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      final token = await secureStorage.read(key: 'auth_token');
+      if (token == null) {
+        throw ServerException(message: 'No token found');
+      }
+
+      await dio.post(
+        '$baseUrl/api/logout',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      await secureStorage.delete(key: 'auth_token');
+    } on DioException catch (e) {
+      await secureStorage.delete(
+        key: 'auth_token',
+      ); // حذف التوكن حتى لو فشل الطلب
+      handleDioException(e);
     }
   }
 
@@ -42,6 +72,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
     } on DioException catch (e) {
       handleDioException(e);
+    }
+  }
+
+  Future<UserModel> getUserProfile() async {
+    try {
+      final token = await secureStorage.read(key: 'auth_token');
+      if (token == null) throw ServerException(message: 'No token found');
+
+      // نفترض وجود هذا الـ endpoint لجلب بيانات المستخدم
+      final response = await dio.get(
+        '$baseUrl/api/profile',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      // الـ API هنا لا تعيد 'token'، فقط 'user'
+      return UserModel.fromJson({'user': response.data['data']});
+    } on DioException catch (e) {
+      handleDioException(e);
+      throw ServerException(message: 'Network error');
     }
   }
 }

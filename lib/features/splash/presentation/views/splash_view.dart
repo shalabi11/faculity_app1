@@ -3,6 +3,10 @@
 import 'dart:async';
 
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:faculity_app2/features/auth/presentation/cubit/auth_state.dart';
+import 'package:faculity_app2/features/main_screen/presentation/screens/student_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -46,26 +50,65 @@ class _SplashViewState extends State<SplashView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.blue, // يمكنك استخدام نفس لون الثيم
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.school, size: 100, color: Colors.white)
-                .animate()
-                .fade(duration: 1500.ms)
-                .scale(begin: const Offset(0.5, 0.5)),
-            const SizedBox(height: 20),
-            const Text(
-              'CollegeHub',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        // TODO: implement listener
+        // بعد 3 ثوانٍ، تحقق من الحالة
+        Future.delayed(const Duration(seconds: 3), () {
+          if (state is Authenticated) {
+            // --- هذا هو التعديل ---
+            // التحقق من دور المستخدم وتوجيهه
+            if (state.user.role == 'admin') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AdminDashboardScreen(user: state.user),
+                ),
+              );
+            } else {
+              // نفترض أن الباقي طلاب حاليًا
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StudentMainScreen(user: state.user),
+                ),
+              );
+            }
+          } else if (state is Unauthenticated) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (_) => BlocProvider(
+                      create: (context) => sl<LoginCubit>(),
+                      child: const LoginScreen(),
+                    ),
               ),
-            ).animate().fade(delay: 500.ms, duration: 1500.ms),
-          ],
+            );
+          }
+        });
+      },
+      child: Scaffold(
+        backgroundColor: Colors.blue, // يمكنك استخدام نفس لون الثيم
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.school, size: 100, color: Colors.white)
+                  .animate()
+                  .fade(duration: 1500.ms)
+                  .scale(begin: const Offset(0.5, 0.5)),
+              const SizedBox(height: 20),
+              const Text(
+                'CollegeHub',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ).animate().fade(delay: 500.ms, duration: 1500.ms),
+            ],
+          ),
         ),
       ),
     );

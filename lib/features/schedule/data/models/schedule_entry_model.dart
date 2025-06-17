@@ -1,4 +1,3 @@
-// lib/features/schedule/data/models/schedule_entry_model.dart
 import '../../domain/entities/schedule_entry.dart';
 
 class ScheduleEntryModel extends ScheduleEntry {
@@ -21,14 +20,20 @@ class ScheduleEntryModel extends ScheduleEntry {
        );
 
   factory ScheduleEntryModel.fromJson(Map<String, dynamic> json) {
+    // الوصول الآمن للبيانات المتداخلة
+    final courseData = json['course'] as Map<String, dynamic>? ?? {};
+    final teacherData = json['teacher'] as Map<String, dynamic>? ?? {};
+    final classroomData = json['classroom'] as Map<String, dynamic>? ?? {};
+
     return ScheduleEntryModel(
-      id: json['id'],
-      courseName: json['course']['name'],
-      teacherName: json['teacher']['name'],
-      classroomName: json['classroom']['name'],
-      day: json['day'],
-      startTime: json['start_time'],
-      endTime: json['end_time'],
+      // استخدام '??' لتوفير قيمة افتراضية في حال كانت القيمة null
+      id: json['id'] ?? 0,
+      courseName: courseData['name'] ?? 'مادة غير محددة',
+      teacherName: teacherData['name'] ?? 'مدرس غير محدد',
+      classroomName: classroomData['name'] ?? 'قاعة غير محددة',
+      day: json['day'] ?? 'يوم غير محدد',
+      startTime: json['start_time'] ?? '00:00',
+      endTime: json['end_time'] ?? '00:00',
     );
   }
 }

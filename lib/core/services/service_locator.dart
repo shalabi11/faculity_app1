@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:faculity_app2/core/theme/cubit/theme_cubit.dart';
 import 'package:faculity_app2/features/announcements/data/datasources/announcement_remote_data_source.dart';
 import 'package:faculity_app2/features/announcements/domain/repositories/announcement_repository.dart';
 import 'package:faculity_app2/features/announcements/domain/repositories/announcement_repository_impl.dart';
@@ -6,72 +7,89 @@ import 'package:faculity_app2/features/announcements/presentation/cubit/announce
 import 'package:faculity_app2/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:faculity_app2/features/auth/domain/repositories/auth_repository.dart';
 import 'package:faculity_app2/features/auth/domain/repositories/auth_repository_impl.dart';
+import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/register_cubit.dart';
+import 'package:faculity_app2/features/exams/data/datasource/exams_remote_data_source.dart';
+import 'package:faculity_app2/features/exams/domain/repositories/exams_repository.dart';
+import 'package:faculity_app2/features/exams/domain/repositories/exams_repository_impl.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
+import 'package:faculity_app2/features/main_screen/presentation/cubit/home_cubit.dart';
+import 'package:faculity_app2/features/main_screen/presentation/cubit/main_screen_cubit.dart';
 import 'package:faculity_app2/features/schedule/data/datasources/schedule_remote_data_source.dart';
 import 'package:faculity_app2/features/schedule/domain/repositories/schedule_repository.dart';
 import 'package:faculity_app2/features/schedule/domain/repositories/schedule_repository_impl.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_cubit.dart';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// إنشاء نسخة من GetIt
 final sl = GetIt.instance;
 
-// دالة لإعداد وتسجيل كل التبعيات
-void setupServiceLocator() {
+Future<void> setupServiceLocator() async {
   // =====================
-  //  AUTH FEATURE
+  //  Auth Feature
   // =====================
-  // Cubits
+  sl.registerLazySingleton(() => AuthCubit(authRepository: sl()));
   sl.registerFactory(() => LoginCubit(authRepository: sl()));
   sl.registerFactory(() => RegisterCubit(authRepository: sl()));
-
-  // Repository
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: sl()),
   );
-
-  // Data Source
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(dio: sl()),
+    () => AuthRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
 
   // =====================
-  //  SCHEDULE FEATURE
+  //  Main Screen & Home Features
   // =====================
-  // Cubit
-  sl.registerFactory(() => ScheduleCubit(repository: sl()));
+  sl.registerFactory(() => MainScreenCubit());
+  sl.registerFactory(() => HomeCubit(scheduleRepository: sl()));
 
-  // Repository
+  // =====================
+  //  Schedule Feature
+  // =====================
+  sl.registerFactory(() => ScheduleCubit(repository: sl()));
   sl.registerLazySingleton<ScheduleRepository>(
     () => ScheduleRepositoryImpl(remoteDataSource: sl()),
   );
-
-  // Data Source
   sl.registerLazySingleton<ScheduleRemoteDataSource>(
     () => ScheduleRemoteDataSourceImpl(dio: sl()),
   );
 
   // =====================
-  //  ANNOUNCEMENT FEATURE
+  //  Announcement Feature
   // =====================
-  // Cubit
   sl.registerFactory(() => AnnouncementCubit(repository: sl()));
-
-  // Repository
   sl.registerLazySingleton<AnnouncementRepository>(
     () => AnnouncementRepositoryImpl(remoteDataSource: sl()),
   );
-
-  // Data Source
   sl.registerLazySingleton<AnnouncementRemoteDataSource>(
     () => AnnouncementRemoteDataSourceImpl(dio: sl()),
   );
 
   // =====================
-  //  EXTERNAL
+  //  Exams Feature
   // =====================
-  // تسجيل كائن Dio كـ Singleton لكي يستخدمه التطبيق بأكمله
+  sl.registerFactory(() => ExamsCubit(repository: sl()));
+  sl.registerLazySingleton<ExamsRepository>(
+    () => ExamsRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<ExamsRemoteDataSource>(
+    () => ExamsRemoteDataSourceImpl(dio: sl()),
+  );
+
+  // =====================
+  //  Theme
+  // =====================
+  sl.registerFactory(() => ThemeCubit(sharedPreferences: sl()));
+
+  // =====================
+  //  External
+  // =====================
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => Dio());
+  sl.registerLazySingleton(() => const FlutterSecureStorage());
 }

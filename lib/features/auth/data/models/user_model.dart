@@ -12,16 +12,18 @@ class UserModel extends User {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // نفترض أن API تعيد هذه البيانات داخل كائن 'user'
-    final userData = json['user'];
+    // التحقق من وجود كائن 'user' وتوفير خريطة فارغة كقيمة افتراضية
+    final userData = json['user'] as Map<String, dynamic>? ?? {};
+
     return UserModel(
-      id: userData['id'],
-      name: userData['name'],
-      email: userData['email'],
-      role: userData['role'],
-      token: json['token'],
-      year: userData['year'],
-      section: userData['section'],
+      // استخدام '??' لتوفير قيمة افتراضية آمنة في حال كانت القيمة null
+      id: userData['id'] ?? 0,
+      name: userData['name'] ?? 'مستخدم غير معروف',
+      email: userData['email'] ?? '',
+      role: userData['role'] ?? 'student',
+      token: json['token'], // هذا قابل ليكون null بالفعل
+      year: userData['year'], // هذا قابل ليكون null بالفعل
+      section: userData['section'], // هذا قابل ليكون null بالفعل
     );
   }
 }
