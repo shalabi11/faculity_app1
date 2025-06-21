@@ -12,7 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 // ignore: unused_element
 class SignUpPrompt extends StatelessWidget {
-  const SignUpPrompt();
+  const SignUpPrompt({super.key});
 
   @override
   Widget build(BuildContext context) {

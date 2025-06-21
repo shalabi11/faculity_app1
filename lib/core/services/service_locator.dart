@@ -3,6 +3,7 @@ import 'package:faculity_app2/core/theme/cubit/theme_cubit.dart';
 import 'package:faculity_app2/features/announcements/data/datasources/announcement_remote_data_source.dart';
 import 'package:faculity_app2/features/announcements/domain/repositories/announcement_repository.dart';
 import 'package:faculity_app2/features/announcements/domain/repositories/announcement_repository_impl.dart';
+import 'package:faculity_app2/features/announcements/presentation/cubit/anage_announcements_cubit.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_cubit.dart';
 import 'package:faculity_app2/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:faculity_app2/features/auth/domain/repositories/auth_repository.dart';
@@ -62,11 +63,12 @@ Future<void> setupServiceLocator() async {
   //  Announcement Feature
   // =====================
   sl.registerFactory(() => AnnouncementCubit(repository: sl()));
+  sl.registerFactory(() => ManageAnnouncementsCubit(repository: sl()));
   sl.registerLazySingleton<AnnouncementRepository>(
     () => AnnouncementRepositoryImpl(remoteDataSource: sl()),
   );
   sl.registerLazySingleton<AnnouncementRemoteDataSource>(
-    () => AnnouncementRemoteDataSourceImpl(dio: sl()),
+    () => AnnouncementRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
 
   // =====================
@@ -79,6 +81,14 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<ExamsRemoteDataSource>(
     () => ExamsRemoteDataSourceImpl(dio: sl()),
   );
+
+  // =====================
+  //  Notifications (Mocked)
+  // =====================
+  // sl.registerFactory(() => NotificationsCubit(repository: sl()));
+  // sl.registerLazySingleton<NotificationRepository>(
+  //   () => MockNotificationRepositoryImpl(),
+  // );
 
   // =====================
   //  Theme

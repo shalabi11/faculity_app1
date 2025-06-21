@@ -1,5 +1,7 @@
 import 'package:faculity_app2/core/services/service_locator.dart';
 import 'package:faculity_app2/core/theme/app_theme.dart';
+import 'package:faculity_app2/core/theme/cubit/theme_cubit.dart';
+import 'package:faculity_app2/core/theme/cubit/theme_state.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:faculity_app2/features/splash/presentation/views/splash_view.dart';
 
@@ -7,10 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() {
+Future<void> main() async {
+  // ضمان تهيئة كل خدمات فلاتر الأساسية قبل تشغيل التطبيق
   WidgetsFlutterBinding.ensureInitialized();
-
-  setupServiceLocator();
+  // إعداد كل التبعيات والخدمات بشكل غير متزامن
+  await setupServiceLocator();
   runApp(const MyApp());
 }
 
@@ -19,25 +22,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // استخدام MultiBlocProvider لتوفير الـ Cubits العامة لكل التطبيق
     return MultiBlocProvider(
-      providers: [BlocProvider(create: (_) => sl<AuthCubit>()..appStarted())],
-      child: MaterialApp(
-        title: 'College Hub',
-        debugShowCheckedModeBanner: false,
+      providers: [
+        BlocProvider(create: (_) => sl<AuthCubit>()..appStarted()),
+        BlocProvider(create: (_) => sl<ThemeCubit>()),
+      ],
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp(
+            title: 'College Hub',
+            debugShowCheckedModeBanner: false,
 
-        // --- استخدام الثيم الجديد من الملف المنفصل ---
-        theme: AppTheme.lightTheme,
+            // تطبيق الثيمات
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: state.themeMode,
 
-        // --- إعدادات اللغة ---
-        locale: const Locale('ar'),
-        supportedLocales: const [Locale('ar'), Locale('en')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
+            // إعدادات اللغة العربية
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
 
-        home: const SplashView(),
+            // نقطة انطلاق واجهة المستخدم
+            home: const SplashView(),
+          );
+        },
       ),
     );
   }

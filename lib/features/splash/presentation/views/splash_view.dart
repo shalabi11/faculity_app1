@@ -1,95 +1,65 @@
-// lib/features/splash/presentation/views/splash_view.dart
-
-import 'dart:async';
-
 import 'package:faculity_app2/core/services/service_locator.dart';
 import 'package:faculity_app2/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_state.dart';
+import 'package:faculity_app2/features/auth/presentation/cubit/login_cubit.dart';
+import 'package:faculity_app2/features/auth/presentation/screens/login_screen.dart';
 import 'package:faculity_app2/features/main_screen/presentation/screens/student_main_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// استيراد شاشة تسجيل الدخول والكيوبت الخاص بها
-import '../../../auth/presentation/cubit/login_cubit.dart';
-import '../../../auth/presentation/screens/login_screen.dart';
-
-class SplashView extends StatefulWidget {
+class SplashView extends StatelessWidget {
   const SplashView({super.key});
 
   @override
-  State<SplashView> createState() => _SplashViewState();
-}
-
-class _SplashViewState extends State<SplashView> {
-  @override
-  void initState() {
-    super.initState();
-    _navigateToLogin();
-  }
-
-  void _navigateToLogin() {
-    // الانتظار لمدة 3 ثوانٍ ثم الانتقال
-    Timer(const Duration(seconds: 3), () {
-      // استخدام pushReplacement لمنع المستخدم من الرجوع إلى شاشة البداية
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder:
-              (context) => BlocProvider(
-                // اطلب الـ Cubit من الـ Service Locator
-                // هو سيتكفل بإنشاء كل السلسلة (Repository, DataSource, Dio)
-                create: (context) => sl<LoginCubit>(),
-                child: const LoginScreen(),
-              ),
-        ),
-      );
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // --- هذا هو المنطق الصحيح والوحيد ---
+    // الاستماع إلى حالة المصادقة لمرة واحدة فقط
     return BlocListener<AuthCubit, AuthState>(
+      // `listenWhen` يمنع المستمع من العمل على الحالات الأولية غير المهمة
+      listenWhen:
+          (previous, current) =>
+              current is Authenticated || current is Unauthenticated,
       listener: (context, state) {
-        // TODO: implement listener
-        // بعد 3 ثوانٍ، تحقق من الحالة
-        Future.delayed(const Duration(seconds: 3), () {
-          if (state is Authenticated) {
-            // --- هذا هو التعديل ---
-            // التحقق من دور المستخدم وتوجيهه
-            if (state.user.role == 'admin') {
+        // لا حاجة لـ Future.delayed هنا، لأن شاشة البداية ستظل ظاهرة
+        // حتى تأتي حالة جديدة من الـ AuthCubit
+        if (state is Authenticated) {
+          switch (state.user.role) {
+            case 'admin':
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (_) => AdminDashboardScreen(user: state.user),
                 ),
               );
-            } else {
-              // نفترض أن الباقي طلاب حاليًا
+              break;
+            case 'student':
+            default: // الخيار الافتراضي هو شاشة الطالب
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (_) => StudentMainScreen(user: state.user),
                 ),
               );
-            }
-          } else if (state is Unauthenticated) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (_) => BlocProvider(
-                      create: (context) => sl<LoginCubit>(),
-                      child: const LoginScreen(),
-                    ),
-              ),
-            );
+              break;
           }
-        });
+        } else if (state is Unauthenticated) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (_) => BlocProvider(
+                    create: (context) => sl<LoginCubit>(),
+                    child: const LoginScreen(),
+                  ),
+            ),
+          );
+        }
       },
       child: Scaffold(
-        backgroundColor: Colors.blue, // يمكنك استخدام نفس لون الثيم
+        backgroundColor: Colors.blue,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -1,51 +1,47 @@
-// lib/features/auth/presentation/screens/login_screen.dart
+import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:faculity_app2/features/auth/widgets/login_header.dart';
 import 'package:faculity_app2/features/auth/widgets/role_selector_widget.dart';
 import 'package:faculity_app2/features/auth/widgets/sign_up_prompt.dart';
 import 'package:faculity_app2/features/main_screen/presentation/screens/student_main_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/user.dart';
 import '../cubit/login_cubit.dart';
 
-const Map<String, Map<String, dynamic>?> _extraFieldConfig = {
-  'student': {
-    'name': 'university_id',
-    'label': 'الرقم الجامعي',
-    'icon': Icons.school_outlined,
-  },
-  'teacher': {
-    'name': 'employee_id',
-    'label': 'الرقم الوظيفي',
-    'icon': Icons.badge_outlined,
-  },
-  'staff': null,
-  'admin': null,
-};
-
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  Widget build(BuildContext context) {
+    // توفير الـ Cubit في الأعلى
+    return BlocProvider(
+      create: (context) => sl<LoginCubit>(),
+      // بناء الواجهة الفعلية باستخدام context جديد
+      child: const _LoginView(),
+    );
+  }
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+// ===============================================
+//  ويدجت عرض الواجهة
+// ===============================================
+class _LoginView extends StatefulWidget {
+  const _LoginView();
+
+  @override
+  State<_LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<_LoginView> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _extraFieldController = TextEditingController();
   String _selectedRole = 'student';
-
-  @override
-  void initState() {
-    super.initState();
-    // Pre-fill for faster testing if needed
-    // _emailController.text = 'student@example.com';
-    // _passwordController.text = '123456';
-    // _extraFieldController.text = '202412345';
-  }
 
   @override
   void dispose() {
@@ -86,20 +82,31 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocConsumer<LoginCubit, LoginState>(
       listener: (context, state) {
         if (state is LoginSuccess) {
-          // تمرير كائن المستخدم إلى الشاشة الرئيسية
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => StudentMainScreen(user: state.user),
-            ),
-            (route) => false,
-          );
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('أهلاً بك ${state.user.name}'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // TODO: Navigate to HomeScreen
+          context.read<AuthCubit>().loggedIn(state.user);
+          switch (state.user.role) {
+            case 'admin':
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder:
+                      (_) => AdminDashboardScreen(
+                        user: state.user,
+                      ), // <-- المشكلة هنا
+                ),
+              );
+
+              break;
+            case 'student':
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder:
+                      (_) => StudentMainScreen(
+                        user: state.user,
+                      ), // <-- المشكلة هنا
+                ),
+              );
+              break;
+            default:
+          }
         } else if (state is LoginFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
@@ -268,3 +275,19 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
+// هذه البيانات يجب أن تكون خارج أي كلاس
+const Map<String, Map<String, dynamic>?> _extraFieldConfig = {
+  'student': {
+    'name': 'university_id',
+    'label': 'الرقم الجامعي',
+    'icon': Icons.school_outlined,
+  },
+  'teacher': {
+    'name': 'employee_id',
+    'label': 'الرقم الوظيفي',
+    'icon': Icons.badge_outlined,
+  },
+  'staff': null,
+  'admin': null,
+};

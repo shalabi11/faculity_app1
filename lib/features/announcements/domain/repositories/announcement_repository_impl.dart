@@ -20,4 +20,36 @@ class AnnouncementRepositoryImpl implements AnnouncementRepository {
       throw Exception('An unknown error occurred');
     }
   }
+    @override
+  Future<void> addAnnouncement({
+    required Map<String, String> data,
+    String? filePath,
+  }) async {
+    try {
+      await remoteDataSource.addAnnouncement(data: data, filePath: filePath);
+    } on ServerException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  @override
+  Future<void> updateAnnouncement({
+    required int id,
+    required Map<String, String> data,
+  }) async {
+    try {
+      await remoteDataSource.updateAnnouncement(id: id, data: data);
+    } on ServerException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  @override
+  Future<void> deleteAnnouncement({required int id}) async {
+    try {
+      await remoteDataSource.deleteAnnouncement(id: id);
+    } on ServerException catch (e) {
+      throw Exception(e.message);
+    }
+  }
 }
