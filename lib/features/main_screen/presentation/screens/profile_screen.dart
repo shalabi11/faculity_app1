@@ -238,7 +238,7 @@ class _ActionsSection extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
-                        context.read<AuthCubit>().loggedOut();
+                        context.read<AuthCubit>().logout();
                       },
                       child: const Text(
                         'خروج',

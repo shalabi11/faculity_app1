@@ -25,12 +25,24 @@ class AuthCubit extends Cubit<AuthState> {
     emit(Authenticated(user));
   }
 
-  Future<void> loggedOut() async {
+  // lib/features/auth/presentation/cubit/auth_cubit.dart
+
+  // ... (داخل كلاس AuthCubit)
+
+  Future<void> logout() async {
     try {
+      // 1. إصدار حالة التحميل أولاً
+      emit(AuthLoading());
+      // تأخير بسيط لرؤية المؤشر (اختياري، جيد للعرض)
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // 2. استدعاء دالة الخروج من المستودع
       await authRepository.logout();
+
+      // 3. إصدار حالة "غير مصادق عليه" بعد النجاح
       emit(Unauthenticated());
-    } catch (e) {
-      // حتى لو فشل طلب الخروج من السيرفر، نسجل خروجه من التطبيق
+    } on Exception catch (_) {
+      // 4. حتى في حال حدوث خطأ، اعتبر المستخدم قد خرج
       emit(Unauthenticated());
     }
   }

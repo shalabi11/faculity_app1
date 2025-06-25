@@ -170,9 +170,17 @@ class _ScheduleLoadingWidget extends StatelessWidget {
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const ShimmerContainer(width: 150, height: 14),
+                  const ShimmerContainer(
+                    width: 150,
+                    height: 14,
+                    borderRadius: 24,
+                  ),
                   const SizedBox(height: 5),
-                  const ShimmerContainer(width: 100, height: 12),
+                  const ShimmerContainer(
+                    width: 100,
+                    height: 12,
+                    borderRadius: 24,
+                  ),
                 ],
               ),
             ),

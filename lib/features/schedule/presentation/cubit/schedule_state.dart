@@ -1,4 +1,6 @@
-import 'package:faculity_app2/features/schedule/domain/entities/schedule_entry.dart';
+// lib/features/schedule/presentation/cubit/schedule_state.dart
+
+part of 'schedule_cubit.dart';
 
 abstract class ScheduleState {}
 
@@ -6,12 +8,12 @@ class ScheduleInitial extends ScheduleState {}
 
 class ScheduleLoading extends ScheduleState {}
 
-class ScheduleLoaded extends ScheduleState {
+class ScheduleSuccess extends ScheduleState {
   final List<ScheduleEntry> schedule;
-  ScheduleLoaded(this.schedule);
+  ScheduleSuccess(this.schedule);
 }
 
-class ScheduleError extends ScheduleState {
+class ScheduleFailure extends ScheduleState {
   final String message;
-  ScheduleError(this.message);
+  ScheduleFailure(this.message);
 }

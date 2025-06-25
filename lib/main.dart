@@ -3,7 +3,9 @@ import 'package:faculity_app2/core/theme/app_theme.dart';
 import 'package:faculity_app2/core/theme/cubit/theme_cubit.dart';
 import 'package:faculity_app2/core/theme/cubit/theme_state.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:faculity_app2/features/schedule/presentation/screens/add_schedule_screen.dart';
 import 'package:faculity_app2/features/splash/presentation/views/splash_view.dart';
+import 'package:faculity_app2/features/student/presentation/screens/mange_student_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

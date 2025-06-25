@@ -1,43 +1,18 @@
-// Enum لتتبع حالة كل جزء من الشاشة على حدة
-import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
-import 'package:faculity_app2/features/exams/domain/enteties/exam_result.dart';
+// lib/features/exams/presentation/cubit/exam_state.dart
+part of 'exam_cubit.dart';
 
-enum ExamsStatus { initial, loading, loaded, error }
+abstract class ExamState {}
 
-class ExamsState {
-  // --- حالة جدول الامتحانات ---
-  final ExamsStatus examsStatus;
+class ExamInitial extends ExamState {}
+
+class ExamLoading extends ExamState {}
+
+class ExamSuccess extends ExamState {
   final List<Exam> exams;
+  ExamSuccess(this.exams);
+}
 
-  // --- حالة نتائج الطالب ---
-  final ExamsStatus resultsStatus;
-  final List<ExamResult> results;
-
-  // --- رسالة الخطأ (مشتركة) ---
-  final String? errorMessage;
-
-  const ExamsState({
-    this.examsStatus = ExamsStatus.initial,
-    this.exams = const [],
-    this.resultsStatus = ExamsStatus.initial,
-    this.results = const [],
-    this.errorMessage,
-  });
-
-  // دالة مساعدة لنسخ الحالة مع تغيير بعض القيم
-  ExamsState copyWith({
-    ExamsStatus? examsStatus,
-    List<Exam>? exams,
-    ExamsStatus? resultsStatus,
-    List<ExamResult>? results,
-    String? errorMessage,
-  }) {
-    return ExamsState(
-      examsStatus: examsStatus ?? this.examsStatus,
-      exams: exams ?? this.exams,
-      resultsStatus: resultsStatus ?? this.resultsStatus,
-      results: results ?? this.results,
-      errorMessage: errorMessage ?? this.errorMessage,
-    );
-  }
+class ExamFailure extends ExamState {
+  final String message;
+  ExamFailure(this.message);
 }

@@ -1,7 +1,9 @@
+// lib/core/widget/shimmer_loading.dart
+
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-// ويدجت أساسي لتأثير التحميل
+// هذا هو الويدجت الرئيسي لتأثير Shimmer
 class ShimmerLoading extends StatelessWidget {
   final Widget child;
 
@@ -17,28 +19,32 @@ class ShimmerLoading extends StatelessWidget {
   }
 }
 
-// ويدجت مخصص لعرض حاوية تحميل (مثل صورة أو أيقونة)
+// --- الويدجت المساعد الجديد ---
+// سنستخدمه لبناء الصناديق الرمادية في واجهة التحميل
 class ShimmerContainer extends StatelessWidget {
-  final double width;
-  final double height;
-  final double borderRadius;
+  final double? width;
+  final double? height;
+  final ShapeBorder shapeBorder;
 
   const ShimmerContainer({
     super.key,
-    this.width = double.infinity,
-    this.height = double.infinity,
-    this.borderRadius = 12.0,
+    this.width,
+    this.height,
+    this.shapeBorder = const RoundedRectangleBorder(),
+    int borderRadius = 24,
   });
+
+  const ShimmerContainer.circular({super.key, required double size})
+    : width = size,
+      height = size,
+      shapeBorder = const CircleBorder();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
+      decoration: ShapeDecoration(color: Colors.grey[300]!, shape: shapeBorder),
     );
   }
 }

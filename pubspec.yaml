@@ -40,6 +40,8 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   get_it: ^8.0.3
   google_fonts: ^6.2.1
+  image_picker: ^1.1.2
+  intl: ^0.20.2
   json_annotation: ^4.9.0
   localization: ^2.1.1
   lottie: ^3.3.1

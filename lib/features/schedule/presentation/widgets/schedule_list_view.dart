@@ -5,7 +5,11 @@ import 'package:flutter/material.dart';
 
 class ScheduleListView extends StatelessWidget {
   final List<ScheduleEntry> entries;
-  const ScheduleListView({super.key, required this.entries});
+  const ScheduleListView({
+    super.key,
+    required this.entries,
+    required List<ScheduleEntry> schedule,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,5 @@
 // lib/features/schedule/domain/entities/schedule_entry.dart
+
 class ScheduleEntry {
   final int id;
   final String courseName;
@@ -7,8 +8,11 @@ class ScheduleEntry {
   final String day;
   final String startTime;
   final String endTime;
+  final String type;
+  final String year;
+  final String? group;
 
-  ScheduleEntry({
+  const ScheduleEntry({
     required this.id,
     required this.courseName,
     required this.teacherName,
@@ -16,5 +20,8 @@ class ScheduleEntry {
     required this.day,
     required this.startTime,
     required this.endTime,
+    required this.type,
+    required this.year,
+    this.group,
   });
 }

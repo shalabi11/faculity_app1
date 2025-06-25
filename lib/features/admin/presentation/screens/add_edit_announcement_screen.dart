@@ -83,28 +83,18 @@ class _AddEditAnnouncementScreenState extends State<AddEditAnnouncementScreen> {
         ),
         body: BlocConsumer<ManageAnnouncementsCubit, ManageAnnouncementsState>(
           listener: (context, state) {
-            if (state is ManageAnnouncementsSuccess) {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              Navigator.of(
+            if (state is ManageAnnouncementsLoading) {
+              // إظهار مؤشر التحميل
+            } else if (state is ManageAnnouncementsSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('تم إنشاء الإعلان بنجاح')),
+              );
+              // 1. أغلق الشاشة وأرجع true كإشارة للنجاح
+              Navigator.pop(context, true);
+            } else if (state is ManageAnnouncementsFailure) {
+              ScaffoldMessenger.of(
                 context,
-              ).pop(true); // إرجاع true للإشارة إلى أن التحديث تم
-            }
-            if (state is ManageAnnouncementsFailure) {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+              ).showSnackBar(SnackBar(content: Text(state.message)));
             }
           },
           builder: (context, state) {

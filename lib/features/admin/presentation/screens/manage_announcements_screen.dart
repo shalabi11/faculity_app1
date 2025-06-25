@@ -7,7 +7,6 @@ import 'package:faculity_app2/features/announcements/presentation/cubit/anage_an
 import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_cubit.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_state.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/manage_announcements_state.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -17,7 +16,8 @@ class ManageAnnouncementsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // توفير الـ Cubits اللازمة لهذه الشاشة
+    // ======================= التعديل هنا =======================
+    // توفير الـ Cubits اللازمة لهذه الشاشة لجعلها مستقلة
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -27,6 +27,7 @@ class ManageAnnouncementsScreen extends StatelessWidget {
       ],
       child: const _ManageAnnouncementsView(),
     );
+    // ==========================================================
   }
 }
 
@@ -127,6 +128,7 @@ class _ManageAnnouncementsView extends StatelessWidget {
                           announcement,
                         ),
                     onEdit: () async {
+                      // نفس منطق الانتظار الذي طبقناه سابقاً
                       final result = await Navigator.of(context).push<bool>(
                         MaterialPageRoute(
                           builder:
@@ -148,6 +150,7 @@ class _ManageAnnouncementsView extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          // نفس منطق الانتظار الذي طبقناه سابقاً
           final result = await Navigator.of(context).push<bool>(
             MaterialPageRoute(
               builder: (_) => const AddEditAnnouncementScreen(),

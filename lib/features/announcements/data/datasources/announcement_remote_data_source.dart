@@ -1,10 +1,12 @@
+// lib/features/announcements/data/datasources/announcement_remote_data_source.dart
+
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:faculity_app2/core/errors/exceptions.dart';
 import 'package:faculity_app2/core/utils/constant.dart';
+import 'package:faculity_app2/features/announcements/data/models/announcement_model.dart';
 import 'package:faculity_app2/features/auth/data/datasources/auth_remote_data_source.dart';
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../models/announcement_model.dart';
 
 abstract class AnnouncementRemoteDataSource {
   Future<List<AnnouncementModel>> getAnnouncements();
@@ -28,7 +30,6 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
     required this.secureStorage,
   });
 
-  // دالة مساعدة للحصول على التوكن وإضافته للهيدر
   Future<Options> _getAuthHeaders() async {
     final token = await secureStorage.read(key: 'auth_token');
     if (token == null) {
@@ -43,15 +44,22 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
   Future<List<AnnouncementModel>> getAnnouncements() async {
     try {
       final response = await dio.get('$baseUrl/api/announcements');
+
+      // يمكنك حذف سطر الطباعة الآن إذا أردت
+      // print('RAW ANNOUNCEMENTS RESPONSE: ${response.data}');
+
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'];
+        // ======================= التعديل النهائي هنا =======================
+        // نقرأ من response.data مباشرة لأنها هي القائمة
+        final List<dynamic> data = response.data;
+        // ===================================================================
         return data.map((json) => AnnouncementModel.fromJson(json)).toList();
       } else {
         throw ServerException(message: 'Failed to load announcements');
       }
     } on DioException catch (e) {
       handleDioException(e);
-      throw ServerException(message: 'Network error'); // Unreachable
+      throw ServerException(message: 'Network error');
     }
   }
 
@@ -62,7 +70,7 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
   }) async {
     try {
       final formData = FormData.fromMap(data);
-      if (filePath != null && filePath.isNotEmpty) {
+      if (filePath != null) {
         formData.files.add(
           MapEntry('attachment', await MultipartFile.fromFile(filePath)),
         );
@@ -83,14 +91,9 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
     required Map<String, String> data,
   }) async {
     try {
-      // الـ API يتوقع x-www-form-urlencoded لتحديث البيانات النصية
-      // لذلك نستخدم `data` مباشرة وليس FormData
-      // ولأن HTML forms لا تدعم PUT، نستخدم POST مع حقل _method
-      final requestData = Map<String, String>.from(data)
-        ..addAll({'_method': 'PUT'});
-      await dio.post(
+      await dio.put(
         '$baseUrl/api/announcements/$id',
-        data: requestData,
+        data: data,
         options: await _getAuthHeaders(),
       );
     } on DioException catch (e) {

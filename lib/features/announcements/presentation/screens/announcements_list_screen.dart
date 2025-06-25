@@ -101,7 +101,7 @@ class _AnnouncementCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    announcement.createdAt,
+                    announcement.createdAt as String,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -132,11 +132,19 @@ class _LoadingList extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const ShimmerContainer(height: 18, width: 200),
+                  const ShimmerContainer(
+                    height: 18,
+                    width: 200,
+                    borderRadius: 24,
+                  ),
                   const SizedBox(height: 12),
-                  const ShimmerContainer(height: 14),
+                  const ShimmerContainer(height: 14, borderRadius: 24),
                   const SizedBox(height: 8),
-                  const ShimmerContainer(height: 14, width: 250),
+                  const ShimmerContainer(
+                    height: 14,
+                    width: 250,
+                    borderRadius: 24,
+                  ),
                 ],
               ),
             ),

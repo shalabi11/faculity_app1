@@ -23,3 +23,5 @@ class AnnouncementError extends AnnouncementState {
   final String message;
   const AnnouncementError(this.message);
 }
+
+class AnnouncementSucces extends AnnouncementState {}
