@@ -2,11 +2,12 @@ import 'package:bloc/bloc.dart';
 import 'package:faculity_app2/features/announcements/domain/repositories/announcement_repository.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/manage_announcements_state.dart';
 
-
 class ManageAnnouncementsCubit extends Cubit<ManageAnnouncementsState> {
   final AnnouncementRepository repository;
-  ManageAnnouncementsCubit({required this.repository})
-    : super(ManageAnnouncementsInitial());
+  ManageAnnouncementsCubit({
+    required this.repository,
+    required Object announcementRepository,
+  }) : super(ManageAnnouncementsInitial());
 
   Future<void> addAnnouncement({
     required Map<String, String> data,

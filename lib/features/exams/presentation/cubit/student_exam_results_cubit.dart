@@ -3,7 +3,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam_result.dart';
 import 'package:faculity_app2/features/exams/domain/repositories/exams_repository.dart';
-part 'student_exam_results_state.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_state.dart';
 
 class StudentExamResultsCubit extends Cubit<StudentExamResultsState> {
   final ExamsRepository examsRepository;

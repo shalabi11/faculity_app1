@@ -21,7 +21,10 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
   }
 
-  Future<void> fetchLabSchedule({required String group}) async {
+  Future<void> fetchLabSchedule({
+    required String group,
+    required String section,
+  }) async {
     try {
       emit(ScheduleLoading());
       final schedule = await repository.getLabSchedule(group);

@@ -49,9 +49,9 @@ class AnnouncementDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 30),
           // عرض المرفق إن وجد
-          if (announcement.attachmentUrl != null &&
-              announcement.attachmentUrl!.isNotEmpty)
-            _AttachmentWidget(url: announcement.attachmentUrl!),
+          // if (announcement.attachmentUrl != null &&
+          //     announcement.attachmentUrl!.isNotEmpty)
+          //   _AttachmentWidget(url: announcement.attachmentUrl!),
         ],
       ),
     );

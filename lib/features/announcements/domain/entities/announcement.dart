@@ -1,19 +1,21 @@
 // lib/features/announcements/domain/entities/announcement.dart
+import 'package:equatable/equatable.dart';
 
-class Announcement {
+class Announcement extends Equatable {
   final int id;
   final String title;
   final String content;
-  final DateTime? createdAt; // <-- أصبح اختياريًا
-  final String? attachmentUrl;
-  final String? userName; // <-- تمت إضافته
+  final DateTime createdAt;
+  final String? userName;
 
-  Announcement({
+  const Announcement({
     required this.id,
     required this.title,
     required this.content,
-    this.createdAt, // <-- أصبح اختياريًا
-    this.attachmentUrl,
-    this.userName, // <-- تمت إضافته
+    required this.createdAt,
+    this.userName,
   });
+
+  @override
+  List<Object?> get props => [id, title, content, createdAt, userName];
 }

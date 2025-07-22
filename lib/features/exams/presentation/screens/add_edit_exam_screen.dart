@@ -49,7 +49,9 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
   @override
   void initState() {
     super.initState();
-    _dateController = TextEditingController(text: widget.exam?.examDate ?? '');
+    _dateController = TextEditingController(
+      text: widget.exam?.examDate.timeZoneName ?? '',
+    );
     _startTimeController = TextEditingController(
       text: widget.exam?.startTime ?? '',
     );

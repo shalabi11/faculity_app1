@@ -7,7 +7,10 @@ import '../../domain/repositories/announcement_repository.dart';
 class AnnouncementCubit extends Cubit<AnnouncementState> {
   final AnnouncementRepository repository;
 
-  AnnouncementCubit({required this.repository}) : super(AnnouncementInitial());
+  AnnouncementCubit({
+    required this.repository,
+    required Object announcementRepository,
+  }) : super(AnnouncementInitial());
 
   Future<void> fetchAnnouncements() async {
     try {

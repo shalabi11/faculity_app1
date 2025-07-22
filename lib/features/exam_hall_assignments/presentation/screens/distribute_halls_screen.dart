@@ -69,6 +69,9 @@ class _DistributeHallsViewState extends State<_DistributeHallsView> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   return ElevatedButton(
+                    style: ButtonStyle(
+                      animationDuration: Duration(milliseconds: 10),
+                    ),
                     onPressed:
                         _selectedExamId == null
                             ? null
@@ -77,7 +80,13 @@ class _DistributeHallsViewState extends State<_DistributeHallsView> {
                                   .read<ExamHallAssignmentCubit>()
                                   .distributeHalls(examId: _selectedExamId!);
                             },
-                    child: const Text('بدء عملية التوزيع'),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: const Text(
+                        'بدء عمليةالتوزيع',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
                   );
                 },
               ),

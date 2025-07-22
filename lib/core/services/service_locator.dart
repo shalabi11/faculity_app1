@@ -111,17 +111,12 @@ Future<void> setupServiceLocator() async {
   // =====================
   //  Schedule Feature
   // =====================
-  // --- التعديل هنا ---
   sl.registerLazySingleton<ScheduleRemoteDataSource>(
     () => ScheduleRemoteDataSourceImpl(
       dio: sl<Dio>(),
       secureStorage: sl<FlutterSecureStorage>(),
     ),
   );
-  sl.registerFactory<ManageScheduleCubit>(
-    () => ManageScheduleCubit(repository: sl<ScheduleRepository>()),
-  );
-
   sl.registerLazySingleton<ScheduleRepository>(
     () => ScheduleRepositoryImpl(
       remoteDataSource: sl<ScheduleRemoteDataSource>(),
@@ -130,26 +125,39 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory<ScheduleCubit>(
     () => ScheduleCubit(repository: sl<ScheduleRepository>()),
   );
+  sl.registerFactory<ManageScheduleCubit>(
+    () => ManageScheduleCubit(repository: sl<ScheduleRepository>()),
+  );
 
-  // =====================
-  //  Announcement Feature
-  // =====================
+  // =======================================================
+  //  Announcement Feature (القسم الذي تم تنظيفه بالكامل)
+  // =======================================================
+  // 3. تسجيل مصدر البيانات (يتم تسجيله مرة واحدة فقط)
   sl.registerLazySingleton<AnnouncementRemoteDataSource>(
     () => AnnouncementRemoteDataSourceImpl(
+      client: sl<Dio>(), // تأكد من أن الـ client هو Dio
       dio: sl<Dio>(),
       secureStorage: sl<FlutterSecureStorage>(),
     ),
   );
+  // 2. تسجيل الـ Repository (يتم تسجيله مرة واحدة فقط)
   sl.registerLazySingleton<AnnouncementRepository>(
     () => AnnouncementRepositoryImpl(
       remoteDataSource: sl<AnnouncementRemoteDataSource>(),
     ),
   );
+  // 1. تسجيل الـ Cubits (كلاهما يعتمد على نفس الـ Repository)
   sl.registerFactory<AnnouncementCubit>(
-    () => AnnouncementCubit(repository: sl<AnnouncementRepository>()),
+    () => AnnouncementCubit(
+      announcementRepository: sl<AnnouncementRepository>(),
+      repository: sl(),
+    ),
   );
   sl.registerFactory<ManageAnnouncementsCubit>(
-    () => ManageAnnouncementsCubit(repository: sl<AnnouncementRepository>()),
+    () => ManageAnnouncementsCubit(
+      announcementRepository: sl<AnnouncementRepository>(),
+      repository: sl(),
+    ),
   );
 
   // =====================
@@ -254,7 +262,9 @@ Future<void> setupServiceLocator() async {
     () => StudentExamResultsCubit(examsRepository: sl<ExamsRepository>()),
   );
 
-  // Exam Hall Assignment Feature
+  // =====================
+  //  Exam Hall Assignment Feature
+  // =====================
   sl.registerLazySingleton<ExamHallAssignmentRemoteDataSource>(
     () =>
         ExamHallAssignmentRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
@@ -266,7 +276,9 @@ Future<void> setupServiceLocator() async {
     () => ExamHallAssignmentCubit(repository: sl()),
   );
 
-  // Users Feature
+  // =====================
+  //  Users Feature
+  // =====================
   sl.registerLazySingleton<AppUserRemoteDataSource>(
     () => AppUserRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );

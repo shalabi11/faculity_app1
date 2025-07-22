@@ -1,11 +1,13 @@
+// lib/features/admin/presentation/screens/manage_announcements_screen.dart
+
 import 'package:faculity_app2/core/services/service_locator.dart';
 import 'package:faculity_app2/core/theme/app_color.dart';
-import 'package:faculity_app2/core/widget/shimmer_loading.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/admin/presentation/screens/add_edit_announcement_screen.dart';
 import 'package:faculity_app2/features/announcements/domain/entities/announcement.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/anage_announcements_cubit.dart';
-import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_cubit.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_state.dart';
+import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_cubit.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/manage_announcements_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,8 +18,6 @@ class ManageAnnouncementsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ======================= التعديل هنا =======================
-    // توفير الـ Cubits اللازمة لهذه الشاشة لجعلها مستقلة
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -27,19 +27,16 @@ class ManageAnnouncementsScreen extends StatelessWidget {
       ],
       child: const _ManageAnnouncementsView(),
     );
-    // ==========================================================
   }
 }
 
 class _ManageAnnouncementsView extends StatelessWidget {
   const _ManageAnnouncementsView();
 
-  // دالة لتحديث قائمة الإعلانات
   void _refreshAnnouncements(BuildContext context) {
     context.read<AnnouncementCubit>().fetchAnnouncements();
   }
 
-  // دالة لعرض حوار تأكيد الحذف
   void _showDeleteConfirmationDialog(
     BuildContext context,
     Announcement announcement,
@@ -89,7 +86,7 @@ class _ManageAnnouncementsView extends StatelessWidget {
                   backgroundColor: AppColors.success,
                 ),
               );
-            _refreshAnnouncements(context); // تحديث القائمة بعد النجاح
+            _refreshAnnouncements(context);
           }
           if (state is ManageAnnouncementsFailure) {
             ScaffoldMessenger.of(context)
@@ -102,55 +99,71 @@ class _ManageAnnouncementsView extends StatelessWidget {
               );
           }
         },
+        // --- التصحيح الجذري هنا ---
         child: BlocBuilder<AnnouncementCubit, AnnouncementState>(
           builder: (context, state) {
-            if (state is AnnouncementLoading && state.announcements.isEmpty) {
-              return const _LoadingList();
+            // 1. التعامل مع حالة التحميل
+            if (state is AnnouncementLoading || state is AnnouncementInitial) {
+              return const LoadingList(); // استخدام الويدجت المشترك
             }
+            // 2. التعامل مع حالة الخطأ
             if (state is AnnouncementError) {
-              return Center(child: Text(state.message));
+              return ErrorState(
+                // استخدام الويدجت المشترك
+                message: state.message,
+                onRetry: () => _refreshAnnouncements(context),
+              );
             }
-            if (state.announcements.isEmpty) {
-              return const Center(child: Text('لا توجد إعلانات لعرضها.'));
+            // 3. التعامل مع حالة النجاح (الأهم)
+            if (state is AnnouncementLoaded) {
+              // الآن فقط يمكننا الوصول إلى state.announcements بأمان
+              if (state.announcements.isEmpty) {
+                return const EmptyState(
+                  // استخدام الويدجت المشترك
+                  message: 'لا توجد إعلانات لإدارتها. قم بإضافة إعلان جديد.',
+                  icon: Icons.add_comment_outlined,
+                );
+              }
+              // عرض القائمة
+              return RefreshIndicator(
+                onRefresh: () async => _refreshAnnouncements(context),
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.announcements.length,
+                  itemBuilder: (context, index) {
+                    final announcement = state.announcements[index];
+                    return _AnnouncementManagementCard(
+                      announcement: announcement,
+                      onDelete:
+                          () => _showDeleteConfirmationDialog(
+                            context,
+                            announcement,
+                          ),
+                      onEdit: () async {
+                        final result = await Navigator.of(context).push<bool>(
+                          MaterialPageRoute(
+                            builder:
+                                (_) => AddEditAnnouncementScreen(
+                                  announcement: announcement,
+                                ),
+                          ),
+                        );
+                        if (result == true) {
+                          _refreshAnnouncements(context);
+                        }
+                      },
+                    );
+                  },
+                ).animate().fade(duration: 400.ms),
+              );
             }
-            return RefreshIndicator(
-              onRefresh: () async => _refreshAnnouncements(context),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.announcements.length,
-                itemBuilder: (context, index) {
-                  final announcement = state.announcements[index];
-                  return _AnnouncementManagementCard(
-                    announcement: announcement,
-                    onDelete:
-                        () => _showDeleteConfirmationDialog(
-                          context,
-                          announcement,
-                        ),
-                    onEdit: () async {
-                      // نفس منطق الانتظار الذي طبقناه سابقاً
-                      final result = await Navigator.of(context).push<bool>(
-                        MaterialPageRoute(
-                          builder:
-                              (_) => AddEditAnnouncementScreen(
-                                announcement: announcement,
-                              ),
-                        ),
-                      );
-                      if (result == true) {
-                        _refreshAnnouncements(context);
-                      }
-                    },
-                  );
-                },
-              ).animate().fade(duration: 400.ms),
-            );
+            // حالة افتراضية لا يجب الوصول إليها
+            return const SizedBox.shrink();
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // نفس منطق الانتظار الذي طبقناه سابقاً
           final result = await Navigator.of(context).push<bool>(
             MaterialPageRoute(
               builder: (_) => const AddEditAnnouncementScreen(),
@@ -166,7 +179,7 @@ class _ManageAnnouncementsView extends StatelessWidget {
   }
 }
 
-// بطاقة الإعلان مع أزرار التحكم
+// ... باقي الكود (_AnnouncementManagementCard) يبقى كما هو بدون تغيير ...
 class _AnnouncementManagementCard extends StatelessWidget {
   final Announcement announcement;
   final VoidCallback onEdit;
@@ -220,38 +233,6 @@ class _AnnouncementManagementCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ويدجت حالة التحميل
-class _LoadingList extends StatelessWidget {
-  const _LoadingList();
-  @override
-  Widget build(BuildContext context) {
-    return ShimmerLoading(
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: 6,
-        itemBuilder: (context, index) {
-          return const Card(
-            margin: EdgeInsets.only(bottom: 16),
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ShimmerContainer(height: 18, width: 200),
-                  SizedBox(height: 12),
-                  ShimmerContainer(height: 14),
-                  SizedBox(height: 8),
-                  ShimmerContainer(height: 14, width: 250),
-                ],
-              ),
-            ),
-          );
-        },
       ),
     );
   }

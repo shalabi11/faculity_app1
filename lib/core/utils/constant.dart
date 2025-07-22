@@ -1,1 +1,1 @@
-final String baseUrl = 'https://college-hub-production-ccaa.up.railway.app';
+final String baseUrl = 'http://127.0.0.1:8000';

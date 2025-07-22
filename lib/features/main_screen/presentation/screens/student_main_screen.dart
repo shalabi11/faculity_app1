@@ -1,14 +1,18 @@
-import 'package:faculity_app2/core/services/service_locator.dart';
+// lib/features/main_screen/presentation/screens/student_main_screen.dart
+
+import 'package:faculity_app2/core/theme/app_color.dart';
 import 'package:faculity_app2/features/auth/domain/entities/user.dart';
-import 'package:faculity_app2/features/main_screen/presentation/cubit/main_screen_cubit.dart';
-import 'package:faculity_app2/features/main_screen/presentation/screens/exams_screen.dart';
-import 'package:faculity_app2/features/main_screen/presentation/screens/home_screen.dart';
-import 'package:faculity_app2/features/main_screen/presentation/screens/profile_screen.dart';
-import 'package:faculity_app2/features/main_screen/presentation/screens/schedule_screen.dart';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
+// استيراد الشاشات مع الحفاظ على أسمائها الأصلية
+import 'home_screen.dart';
+import 'schedule_screen.dart';
+import 'exams_screen.dart';
+import 'profile_screen.dart';
+
+// تم تحويل الويدجت إلى StatefulWidget لإدارة حالته الداخلية (الصفحة المختارة)
+// هذا التغيير ضروري لتحقيق التنقل السلس دون التأثير على منطق الكود في أي مكان آخر
 class StudentMainScreen extends StatefulWidget {
   final User user;
   const StudentMainScreen({super.key, required this.user});
@@ -17,35 +21,15 @@ class StudentMainScreen extends StatefulWidget {
   State<StudentMainScreen> createState() => _StudentMainScreenState();
 }
 
-class _StudentMainScreenState extends State<StudentMainScreen>
-    with TickerProviderStateMixin {
+class _StudentMainScreenState extends State<StudentMainScreen> {
+  // Controller للتحكم في الصفحات
+  final PageController _pageController = PageController();
+  int _selectedIndex = 0;
+
+  // قائمة الشاشات بنفس أسمائها
   late final List<Widget> _screens;
-  // TabControllers لكل شاشة تحتاجها
-  late final TabController _scheduleTabController;
-  late final TabController _examsTabController;
 
-  @override
-  void initState() {
-    super.initState();
-    _scheduleTabController = TabController(length: 2, vsync: this);
-    _examsTabController = TabController(length: 2, vsync: this);
-
-    _screens = [
-      HomeScreen(user: widget.user),
-      // تمرير الـ TabController إلى الشاشات الفرعية
-      ScheduleScreen(user: widget.user, tabController: _scheduleTabController),
-      ExamsScreen(user: widget.user, tabController: _examsTabController),
-      ProfileScreen(user: widget.user),
-    ];
-  }
-
-  @override
-  void dispose() {
-    _scheduleTabController.dispose();
-    _examsTabController.dispose();
-    super.dispose();
-  }
-
+  // قائمة العناوين
   final List<String> _appBarTitles = const [
     'الرئيسية',
     'الجدول الدراسي',
@@ -53,76 +37,86 @@ class _StudentMainScreenState extends State<StudentMainScreen>
     'الملف الشخصي',
   ];
 
-  // دالة لبناء الـ TabBar بناءً على الشاشة الحالية
-  PreferredSizeWidget? _buildTabBar(int selectedIndex) {
-    if (selectedIndex == 1) {
-      // شاشة الجدول
-      return TabBar(
-        controller: _scheduleTabController,
-        indicatorColor: Colors.white,
-        indicatorWeight: 3,
-        tabs: const [Tab(text: 'الجدول النظري'), Tab(text: 'الجدول العملي')],
-      );
-    } else if (selectedIndex == 2) {
-      // شاشة الامتحانات
-      return TabBar(
-        controller: _examsTabController,
-        indicatorColor: Colors.white,
-        indicatorWeight: 3,
-        tabs: const [Tab(text: 'جدول الامتحانات'), Tab(text: 'نتائجي')],
-      );
-    }
-    return null; // لا يوجد TabBar للشاشات الأخرى
+  @override
+  void initState() {
+    super.initState();
+    // بناء قائمة الشاشات وتمرير بيانات المستخدم
+    _screens = [
+      HomeScreen(user: widget.user),
+      ScheduleScreen(user: widget.user),
+      ExamsScreen(user: widget.user),
+      ProfileScreen(user: widget.user),
+    ];
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  // دالة لتغيير الصفحة عند الضغط على شريط التنقل
+  void _onTabTapped(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // استخدام BlocProvider هنا لتوفير Cubit لإدارة حالة التنقل
-    return BlocProvider(
-      create: (context) => sl<MainScreenCubit>(),
-      child: BlocBuilder<MainScreenCubit, MainScreenState>(
-        builder: (context, state) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(_appBarTitles[state.selectedIndex]),
-              // الـ bottom الآن ديناميكي
-              bottom: _buildTabBar(state.selectedIndex),
-              automaticallyImplyLeading: false,
-              actions: [
-                IconButton(onPressed: () {}, icon: Icon(Icons.notifications)),
-              ],
-            ),
-            body: IndexedStack(index: state.selectedIndex, children: _screens),
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: state.selectedIndex,
-              onTap: (index) {
-                context.read<MainScreenCubit>().changeTab(index);
-              },
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_outlined),
-                  activeIcon: Icon(Icons.home),
-                  label: 'الرئيسية',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.calendar_today_outlined),
-                  activeIcon: Icon(Icons.calendar_today),
-                  label: 'الجدول',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.bar_chart_outlined),
-                  activeIcon: Icon(Icons.bar_chart),
-                  label: 'الامتحانات',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline),
-                  activeIcon: Icon(Icons.person),
-                  label: 'حسابي',
-                ),
-              ],
-            ),
-          );
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_appBarTitles[_selectedIndex]),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // يمكنك إضافة وظيفة هنا لاحقاً
+            },
+            icon: const Icon(Icons.notifications_none_rounded),
+          ).animate().fade().slideX(),
+        ],
+      ),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
         },
+        children: _screens,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onTabTapped,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Theme.of(context).cardColor,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: Colors.grey,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home_filled),
+            label: 'الرئيسية',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month_outlined),
+            activeIcon: Icon(Icons.calendar_month),
+            label: 'الجدول',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.library_books_outlined),
+            activeIcon: Icon(Icons.library_books),
+            label: 'الامتحانات',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'حسابي',
+          ),
+        ],
       ),
     );
   }

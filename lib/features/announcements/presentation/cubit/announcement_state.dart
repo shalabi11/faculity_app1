@@ -1,27 +1,29 @@
+// lib/features/announcements/presentation/cubit/announcement_state.dart
+
+import 'package:equatable/equatable.dart';
 import 'package:faculity_app2/features/announcements/domain/entities/announcement.dart';
 
-abstract class AnnouncementState {
-  // وضع قائمة الإعلانات هنا يجعلها متاحة في كل الحالات
-  final List<Announcement> announcements;
-  const AnnouncementState({this.announcements = const []});
+abstract class AnnouncementState extends Equatable {
+  const AnnouncementState();
+
+  @override
+  List<Object> get props => [];
 }
 
 class AnnouncementInitial extends AnnouncementState {}
 
-// حالة التحميل الآن تحتوي على قائمة الإعلانات القديمة (إن وجدت)
-// هذا مفيد عند عمل "تحديث بالسحب" لعرض البيانات القديمة أثناء جلب الجديدة
-class AnnouncementLoading extends AnnouncementState {
-  const AnnouncementLoading({super.announcements});
-}
-
-class AnnouncementLoaded extends AnnouncementState {
-  const AnnouncementLoaded(List<Announcement> announcements)
-    : super(announcements: announcements);
-}
+class AnnouncementLoading extends AnnouncementState {}
 
 class AnnouncementError extends AnnouncementState {
   final String message;
   const AnnouncementError(this.message);
+  @override
+  List<Object> get props => [message];
 }
 
-class AnnouncementSucces extends AnnouncementState {}
+class AnnouncementLoaded extends AnnouncementState {
+  final List<Announcement> announcements;
+  const AnnouncementLoaded(this.announcements);
+  @override
+  List<Object> get props => [announcements];
+}

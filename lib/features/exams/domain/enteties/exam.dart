@@ -3,7 +3,7 @@
 class Exam {
   final int id;
   final String courseName;
-  final String examDate;
+  final DateTime examDate;
   final String startTime;
   final String endTime;
   final String type;

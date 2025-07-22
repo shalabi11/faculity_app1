@@ -70,7 +70,7 @@ class SplashView extends StatelessWidget {
                   .scale(begin: const Offset(0.5, 0.5)),
               const SizedBox(height: 20),
               const Text(
-                'CollegeHub',
+                '',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,

@@ -28,6 +28,7 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
   AnnouncementRemoteDataSourceImpl({
     required this.dio,
     required this.secureStorage,
+    required Object client,
   });
 
   Future<Options> _getAuthHeaders() async {

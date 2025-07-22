@@ -87,7 +87,10 @@ class _ScheduleViewState extends State<_ScheduleView> {
     if (widget.isTheory) {
       context.read<ScheduleCubit>().fetchTheorySchedule(year: _controller.text);
     } else {
-      context.read<ScheduleCubit>().fetchLabSchedule(group: _controller.text);
+      context.read<ScheduleCubit>().fetchLabSchedule(
+        group: _controller.text,
+        section: '',
+      );
     }
   }
 

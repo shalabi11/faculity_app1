@@ -79,8 +79,9 @@ class _ManageExamsView extends StatelessWidget {
         },
         child: BlocBuilder<ExamCubit, ExamState>(
           builder: (context, state) {
-            if (state is ExamLoading)
+            if (state is ExamLoading) {
               return const Center(child: CircularProgressIndicator());
+            }
             if (state is ExamFailure)
               return Center(child: Text('حدث خطأ: ${state.message}'));
             if (state is ExamSuccess) {
