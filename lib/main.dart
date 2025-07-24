@@ -1,21 +1,28 @@
-import 'package:faculity_app2/core/services/service_locator.dart';
-import 'package:faculity_app2/core/theme/app_theme.dart';
-import 'package:faculity_app2/core/theme/cubit/theme_cubit.dart';
-import 'package:faculity_app2/core/theme/cubit/theme_state.dart';
-import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:faculity_app2/features/schedule/presentation/screens/add_schedule_screen.dart';
-import 'package:faculity_app2/features/splash/presentation/views/splash_view.dart';
-import 'package:faculity_app2/features/student/presentation/screens/mange_student_screen.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:faculity_app2/core/services/service_locator.dart'
+    as di; // <-- تم التعديل هنا
+import 'package:faculity_app2/features/student_affairs/presentation/cubit/student_affairs_cubit.dart';
+import 'package:faculity_app2/features/student_affairs/presentation/screens/student_affairs_dashboard_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 Future<void> main() async {
-  // ضمان تهيئة كل خدمات فلاتر الأساسية قبل تشغيل التطبيق
+  // التأكد من تهيئة كل شيء قبل تشغيل التطبيق
   WidgetsFlutterBinding.ensureInitialized();
-  // إعداد كل التبعيات والخدمات بشكل غير متزامن
-  await setupServiceLocator();
+  // استدعاء دالة تهيئة الاعتماديات من الملف الصحيح
+  await di.setupServiceLocator(); // <-- تم التعديل هنا
+  // --- 3. أضف هذا الكود بالكامل ---
+  // ==================== كود مؤقت للتجربة فقط ====================
+  final secureStorage = di.sl<FlutterSecureStorage>();
+
+  // !!! مهم جداً: الصق التوكن الحقيقي الذي نسخته من Postman هنا
+  const String tempAuthToken =
+      '12|JSqDUnL64ldWQZhrvQPowmcmswyyj1T4v5Zm204Y57f4c06d';
+
+  await secureStorage.write(key: 'auth_token', value: tempAuthToken);
+  // ===============================================================
+
   runApp(const MyApp());
 }
 
@@ -24,36 +31,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // استخدام MultiBlocProvider لتوفير الـ Cubits العامة لكل التطبيق
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => sl<AuthCubit>()..appStarted()),
-        BlocProvider(create: (_) => sl<ThemeCubit>()),
-      ],
-      child: BlocBuilder<ThemeCubit, ThemeState>(
-        builder: (context, state) {
-          return MaterialApp(
-            title: 'College Hub',
-            debugShowCheckedModeBanner: false,
-
-            // تطبيق الثيمات
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: state.themeMode,
-
-            // إعدادات اللغة العربية
-            locale: const Locale('ar'),
-            supportedLocales: const [Locale('ar'), Locale('en')],
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-
-            // نقطة انطلاق واجهة المستخدم
-            home: const SplashView(),
-          );
-        },
+    // استخدام BlocProvider لتوفير الـ Cubit للشاشة
+    return BlocProvider(
+      create:
+          (_) => di.sl<StudentAffairsCubit>(), // <-- إنشاء Cubit شؤون الطلاب
+      child: MaterialApp(
+        title: 'College Hub - Test Mode',
+        theme: ThemeData(
+          primarySwatch: Colors.teal,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          fontFamily: 'Cairo', // يمكنك تحديد خط عربي مناسب هنا
+        ),
+        debugShowCheckedModeBanner: false,
+        // إعدادات دعم اللغة العربية
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('ar', 'AE')],
+        locale: const Locale('ar', 'AE'),
+        // جعل شاشة شؤون الطلاب هي الشاشة الرئيسية للتجربة
+        home: const StudentAffairsDashboardScreen(),
       ),
     );
   }

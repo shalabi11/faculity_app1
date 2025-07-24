@@ -1,16 +1,13 @@
+// الكود الصحيح
 import 'package:bloc/bloc.dart';
-import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_state.dart';
-import 'package:meta/meta.dart';
-import '../../domain/entities/announcement.dart';
 import '../../domain/repositories/announcement_repository.dart';
+import 'announcement_state.dart';
 
 class AnnouncementCubit extends Cubit<AnnouncementState> {
   final AnnouncementRepository repository;
 
-  AnnouncementCubit({
-    required this.repository,
-    required Object announcementRepository,
-  }) : super(AnnouncementInitial());
+  // قمنا بحذف البارامتر المكرر والخاطئ
+  AnnouncementCubit({required this.repository}) : super(AnnouncementInitial());
 
   Future<void> fetchAnnouncements() async {
     try {

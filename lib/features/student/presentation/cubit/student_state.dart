@@ -6,7 +6,9 @@ abstract class StudentState {}
 
 class StudentInitial extends StudentState {}
 
-class StudentLoading extends StudentState {}
+class StudentLoading extends StudentState {
+  get students => null;
+}
 
 class StudentSuccess extends StudentState {
   final List<Student> students;

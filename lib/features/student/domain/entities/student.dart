@@ -1,13 +1,14 @@
-// lib/features/student/domain/entities/student.dart
+import 'package:equatable/equatable.dart';
 
-class Student {
+class Student extends Equatable {
   final int id;
   final String universityId;
   final String fullName;
   final String motherName;
   final String birthDate;
-  final String birthPlace; // <-- تم إصلاح الخطأ الإملائي هنا
+  final String birthPlace;
   final String department;
+  final String year; // أضفنا السنة
   final double highSchoolGpa;
   final String? profileImageUrl;
 
@@ -17,9 +18,24 @@ class Student {
     required this.fullName,
     required this.motherName,
     required this.birthDate,
-    required this.birthPlace, // <-- تم إصلاح الخطأ الإملائي هنا
+    required this.birthPlace,
     required this.department,
+    required this.year,
     required this.highSchoolGpa,
     this.profileImageUrl,
   });
+
+  @override
+  List<Object?> get props => [
+    id,
+    universityId,
+    fullName,
+    motherName,
+    birthDate,
+    birthPlace,
+    department,
+    year,
+    highSchoolGpa,
+    profileImageUrl,
+  ];
 }

@@ -2,15 +2,19 @@
 
 import 'dart:io';
 import 'package:bloc/bloc.dart';
-import 'package:faculity_app2/features/student/domain/repositories/student_repository.dart';
+
+import '../../data/models/student_model.dart';
+import '../../domain/repositories/student_repository.dart';
 
 part 'manage_student_state.dart';
 
 class ManageStudentCubit extends Cubit<ManageStudentState> {
   final StudentRepository studentRepository;
 
-  ManageStudentCubit({required this.studentRepository})
-    : super(ManageStudentInitial());
+  ManageStudentCubit({
+    required this.studentRepository,
+    required Object addStudentUseCase,
+  }) : super(ManageStudentInitial());
 
   Future<void> addStudent({
     required Map<String, dynamic> studentData,
@@ -51,4 +55,6 @@ class ManageStudentCubit extends Cubit<ManageStudentState> {
       emit(ManageStudentFailure(e.toString().replaceAll('Exception: ', '')));
     }
   }
+
+  void createStudent(StudentModel newStudent, File? profileImage) {}
 }

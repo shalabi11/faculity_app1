@@ -4,10 +4,10 @@ import 'package:faculity_app2/features/announcements/presentation/cubit/manage_a
 
 class ManageAnnouncementsCubit extends Cubit<ManageAnnouncementsState> {
   final AnnouncementRepository repository;
-  ManageAnnouncementsCubit({
-    required this.repository,
-    required Object announcementRepository,
-  }) : super(ManageAnnouncementsInitial());
+
+  // --- هذا هو التعريف الصحيح والوحيد المطلوب ---
+  ManageAnnouncementsCubit({required this.repository})
+    : super(ManageAnnouncementsInitial());
 
   Future<void> addAnnouncement({
     required Map<String, String> data,

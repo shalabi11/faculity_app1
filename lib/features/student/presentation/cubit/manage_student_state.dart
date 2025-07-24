@@ -2,7 +2,9 @@
 
 part of 'manage_student_cubit.dart';
 
-abstract class ManageStudentState {}
+abstract class ManageStudentState {
+  String? message;
+}
 
 class ManageStudentInitial extends ManageStudentState {}
 
