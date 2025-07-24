@@ -7,7 +7,7 @@ class TeacherInitial extends TeacherState {}
 class TeacherLoading extends TeacherState {}
 
 class TeacherSuccess extends TeacherState {
-  final List<Teacher> teachers;
+  final List<TeacherEntity> teachers;
   TeacherSuccess(this.teachers);
 }
 

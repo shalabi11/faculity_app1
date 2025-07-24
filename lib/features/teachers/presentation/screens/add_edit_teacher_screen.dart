@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddEditTeacherScreen extends StatelessWidget {
-  final Teacher? teacher;
+  final TeacherEntity? teacher;
   const AddEditTeacherScreen({super.key, this.teacher});
 
   @override
@@ -18,7 +18,7 @@ class AddEditTeacherScreen extends StatelessWidget {
 }
 
 class _AddEditTeacherView extends StatefulWidget {
-  final Teacher? teacher;
+  final TeacherEntity? teacher;
   const _AddEditTeacherView({this.teacher});
 
   @override
@@ -29,12 +29,13 @@ class _AddEditTeacherViewState extends State<_AddEditTeacherView> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _fullNameController;
   late TextEditingController _motherNameController;
-  late TextEditingController _birthDateController;
+  // late TextEditingController _birthDateController;
   late TextEditingController _birthPlaceController;
   late TextEditingController _academicDegreeController;
   late TextEditingController _degreeSourceController;
   late TextEditingController _departmentController;
   late TextEditingController _positionController;
+  DateTime? _selectedBirthDate;
 
   bool get _isEditMode => widget.teacher != null;
 
@@ -47,9 +48,10 @@ class _AddEditTeacherViewState extends State<_AddEditTeacherView> {
     _motherNameController = TextEditingController(
       text: widget.teacher?.motherName ?? '',
     );
-    _birthDateController = TextEditingController(
-      text: widget.teacher?.birthDate ?? '',
-    );
+    _selectedBirthDate =
+        widget.teacher != null
+            ? DateTime.parse(widget.teacher!.birthDate)
+            : null;
     _birthPlaceController = TextEditingController(
       text: widget.teacher?.birthPlace ?? '',
     );
@@ -71,7 +73,7 @@ class _AddEditTeacherViewState extends State<_AddEditTeacherView> {
   void dispose() {
     _fullNameController.dispose();
     _motherNameController.dispose();
-    _birthDateController.dispose();
+    // _birthDateController has been removed.
     _birthPlaceController.dispose();
     _academicDegreeController.dispose();
     _degreeSourceController.dispose();
@@ -85,7 +87,7 @@ class _AddEditTeacherViewState extends State<_AddEditTeacherView> {
       final teacherData = {
         'full_name': _fullNameController.text,
         'mother_name': _motherNameController.text,
-        'birth_date': _birthDateController.text,
+        'birth_date': _selectedBirthDate!.toIso8601String().substring(0, 10),
         'birth_place': _birthPlaceController.text,
         'academic_degree': _academicDegreeController.text,
         'degree_source': _degreeSourceController.text,
@@ -97,6 +99,13 @@ class _AddEditTeacherViewState extends State<_AddEditTeacherView> {
         context.read<ManageTeacherCubit>().updateTeacher(
           id: widget.teacher!.id,
           teacherData: teacherData,
+        );
+      } else if (_selectedBirthDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('يرجى اختيار تاريخ الميلاد'),
+            backgroundColor: Colors.orange,
+          ),
         );
       } else {
         context.read<ManageTeacherCubit>().addTeacher(teacherData: teacherData);
@@ -140,12 +149,38 @@ class _AddEditTeacherViewState extends State<_AddEditTeacherView> {
                 validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _birthDateController,
-                decoration: const InputDecoration(
-                  labelText: 'تاريخ الميلاد (YYYY-MM-DD)',
+              // 5. استبدل TextFormField الخاص بتاريخ الميلاد بهذا الكود
+              InkWell(
+                onTap: () async {
+                  final DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedBirthDate ?? DateTime.now(),
+                    firstDate: DateTime(1940),
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _selectedBirthDate = pickedDate;
+                    });
+                  }
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'تاريخ الميلاد',
+                    border: OutlineInputBorder(),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        _selectedBirthDate != null
+                            ? '${_selectedBirthDate!.year}/${_selectedBirthDate!.month}/${_selectedBirthDate!.day}'
+                            : 'اختر تاريخاً',
+                      ),
+                      const Icon(Icons.calendar_today),
+                    ],
+                  ),
                 ),
-                validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(

@@ -11,7 +11,7 @@ class TeacherRepositoryImpl implements TeacherRepository {
   TeacherRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<Teacher>> getTeachers() async {
+  Future<List<TeacherEntity>> getTeachers() async {
     try {
       return await remoteDataSource.getTeachers();
     } on ServerException catch (e) {

@@ -1,6 +1,6 @@
 import 'package:faculity_app2/features/teachers/domain/entities/teacher.dart';
 
-class TeacherModel extends Teacher {
+class TeacherModel extends TeacherEntity {
   const TeacherModel({
     required super.id,
     required super.fullName,

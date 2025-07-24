@@ -1,33 +1,27 @@
-// lib/features/teacher/domain/entities/teacher_entity.dart
-// (ملاحظة: يفضل إعادة تسمية الملف إلى teacher_entity.dart)
-
 import 'package:equatable/equatable.dart';
 
-class TeacherEntity extends Equatable {
+class StaffEntity extends Equatable {
   final int id;
   final String fullName;
   final String motherName;
   final String birthDate;
   final String birthPlace;
   final String academicDegree;
-  final String degreeSource;
   final String department;
-  final String position;
+  final String employmentDate;
 
-  const TeacherEntity({
+  const StaffEntity({
     required this.id,
     required this.fullName,
     required this.motherName,
     required this.birthDate,
     required this.birthPlace,
     required this.academicDegree,
-    required this.degreeSource,
     required this.department,
-    required this.position,
+    required this.employmentDate,
   });
 
   @override
-  // هذه القائمة تخبر Equatable ما هي الحقول التي يجب مقارنتها
   List<Object?> get props => [
     id,
     fullName,
@@ -35,8 +29,7 @@ class TeacherEntity extends Equatable {
     birthDate,
     birthPlace,
     academicDegree,
-    degreeSource,
     department,
-    position,
+    employmentDate,
   ];
 }

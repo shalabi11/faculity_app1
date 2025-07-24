@@ -25,7 +25,7 @@ class ManageTeachersScreen extends StatelessWidget {
 class _ManageTeachersView extends StatelessWidget {
   const _ManageTeachersView();
 
-  void _showDeleteDialog(BuildContext context, Teacher teacher) {
+  void _showDeleteDialog(BuildContext context, TeacherEntity teacher) {
     showDialog(
       context: context,
       builder:

@@ -1,3 +1,4 @@
+import 'package:faculity_app2/features/personnel_office/presentation/screens/personnel_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:faculity_app2/core/services/service_locator.dart'
@@ -52,7 +53,7 @@ class MyApp extends StatelessWidget {
         supportedLocales: const [Locale('ar', 'AE')],
         locale: const Locale('ar', 'AE'),
         // جعل شاشة شؤون الطلاب هي الشاشة الرئيسية للتجربة
-        home: const StudentAffairsDashboardScreen(),
+        home: const PersonnelDashboardScreen(),
       ),
     );
   }

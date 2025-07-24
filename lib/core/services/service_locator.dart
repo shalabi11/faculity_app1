@@ -40,6 +40,11 @@ import 'package:faculity_app2/features/schedule/domain/repositories/schedule_rep
 import 'package:faculity_app2/features/schedule/domain/repositories/schedule_repository_impl.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/manage_schedule_cubit.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_cubit.dart';
+import 'package:faculity_app2/features/staff/data/datasources/staff_remote_data_source.dart';
+import 'package:faculity_app2/features/staff/domain/repositories/staff_repository.dart';
+import 'package:faculity_app2/features/staff/domain/repositories/staff_repository_impl.dart';
+import 'package:faculity_app2/features/staff/presentation/cubit/manage_staff_cubit.dart';
+import 'package:faculity_app2/features/staff/presentation/cubit/staff_cubit.dart';
 import 'package:faculity_app2/features/student/data/datasource/student_remote_data_source.dart';
 import 'package:faculity_app2/features/student/domain/repositories/student_repository.dart';
 import 'package:faculity_app2/features/student/domain/repositories/student_repository_impl.dart';
@@ -237,4 +242,23 @@ Future<void> setupServiceLocator() async {
     () => AppUserRepositoryImpl(remoteDataSource: sl()),
   );
   sl.registerFactory<AppUserCubit>(() => AppUserCubit(repository: sl()));
+
+  //================== Staff Feature ==================
+  // Cubit
+// Cubit
+  sl.registerFactory(() => StaffCubit(staffRepository: sl()));
+  sl.registerFactory(
+    () => ManageStaffCubit(staffRepository: sl()),
+  ); // <-- أضف هذا السطر
+
+
+  // Repository
+  sl.registerLazySingleton<StaffRepository>(
+    () => StaffRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton<StaffRemoteDataSource>(
+    () => StaffRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
+  );
 }
