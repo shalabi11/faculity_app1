@@ -1,6 +1,6 @@
-// lib/features/schedule/domain/entities/schedule_entry.dart
+import 'package:equatable/equatable.dart';
 
-class ScheduleEntry {
+class ScheduleEntity extends Equatable {
   final int id;
   final String courseName;
   final String teacherName;
@@ -12,7 +12,7 @@ class ScheduleEntry {
   final String year;
   final String? group;
 
-  const ScheduleEntry({
+  const ScheduleEntity({
     required this.id,
     required this.courseName,
     required this.teacherName,
@@ -24,4 +24,19 @@ class ScheduleEntry {
     required this.year,
     this.group,
   });
+
+  @override
+  // هذه القائمة تخبر Equatable أي الحقول يجب مقارنتها
+  List<Object?> get props => [
+    id,
+    courseName,
+    teacherName,
+    classroomName,
+    day,
+    startTime,
+    endTime,
+    type,
+    year,
+    group,
+  ];
 }

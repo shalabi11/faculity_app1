@@ -7,7 +7,7 @@ class HomeInitial extends HomeState {}
 class TodaysScheduleLoading extends HomeState {}
 
 class TodaysScheduleLoaded extends HomeState {
-  final List<ScheduleEntry> entries;
+  final List<ScheduleEntity> entries;
   TodaysScheduleLoaded(this.entries);
 }
 

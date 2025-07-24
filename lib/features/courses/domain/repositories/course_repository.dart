@@ -1,11 +1,13 @@
-import 'package:faculity_app2/features/courses/domain/entities/course.dart';
+import 'package:dartz/dartz.dart';
+import 'package:faculity_app2/core/errors/failures.dart';
+import 'package:faculity_app2/features/courses/domain/entities/course_entity.dart';
 
 abstract class CourseRepository {
-  Future<List<Course>> getCourses();
-  Future<void> addCourse({required Map<String, dynamic> courseData});
-  Future<void> updateCourse({
-    required int id,
-    required Map<String, dynamic> courseData,
-  });
-  Future<void> deleteCourse({required int id});
+  Future<Either<Failure, List<CourseEntity>>> getAllCourses();
+  Future<Either<Failure, Unit>> addCourse(Map<String, dynamic> courseData);
+  Future<Either<Failure, Unit>> updateCourse(
+    int id,
+    Map<String, dynamic> courseData,
+  );
+  Future<Either<Failure, Unit>> deleteCourse(int id);
 }

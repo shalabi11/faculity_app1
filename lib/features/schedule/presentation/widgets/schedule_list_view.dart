@@ -5,6 +5,7 @@ import 'package:faculity_app2/core/theme/app_color.dart';
 import 'package:faculity_app2/core/widget/shimmer_loading.dart';
 import 'package:faculity_app2/features/schedule/domain/entities/schedule_entry.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_cubit.dart';
+import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -131,7 +132,7 @@ class _ScheduleViewContent extends StatelessWidget {
 
 // بطاقة عرض المحاضرة بتصميم احترافي
 class _ScheduleCard extends StatelessWidget {
-  final ScheduleEntry schedule;
+  final ScheduleEntity schedule;
   const _ScheduleCard({required this.schedule});
 
   @override

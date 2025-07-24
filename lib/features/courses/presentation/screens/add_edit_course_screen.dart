@@ -1,11 +1,11 @@
 import 'package:faculity_app2/core/services/service_locator.dart';
-import 'package:faculity_app2/features/courses/domain/entities/course.dart';
+import 'package:faculity_app2/features/courses/domain/entities/course_entity.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/manage_course_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddEditCourseScreen extends StatelessWidget {
-  final Course? course;
+  final CourseEntity? course;
   const AddEditCourseScreen({super.key, this.course});
 
   @override
@@ -18,7 +18,7 @@ class AddEditCourseScreen extends StatelessWidget {
 }
 
 class _AddEditCourseView extends StatefulWidget {
-  final Course? course;
+  final CourseEntity? course;
   const _AddEditCourseView({this.course});
 
   @override

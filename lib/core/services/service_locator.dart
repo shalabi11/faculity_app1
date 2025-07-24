@@ -40,6 +40,7 @@ import 'package:faculity_app2/features/schedule/domain/repositories/schedule_rep
 import 'package:faculity_app2/features/schedule/domain/repositories/schedule_repository_impl.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/manage_schedule_cubit.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_cubit.dart';
+import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_form_data_cubit.dart';
 import 'package:faculity_app2/features/staff/data/datasources/staff_remote_data_source.dart';
 import 'package:faculity_app2/features/staff/domain/repositories/staff_repository.dart';
 import 'package:faculity_app2/features/staff/domain/repositories/staff_repository_impl.dart';
@@ -127,7 +128,7 @@ Future<void> setupServiceLocator() async {
 
   // -- Main Screen & Home Features --
   sl.registerFactory<MainScreenCubit>(() => MainScreenCubit());
-  sl.registerFactory<HomeCubit>(() => HomeCubit(scheduleRepository: sl()));
+  // sl.registerFactory<HomeCubit>(() => HomeCubit(scheduleRepository: sl()));
 
   // -- Schedule Feature --
   sl.registerLazySingleton<ScheduleRemoteDataSource>(
@@ -139,6 +140,13 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory<ScheduleCubit>(() => ScheduleCubit(repository: sl()));
   sl.registerFactory<ManageScheduleCubit>(
     () => ManageScheduleCubit(repository: sl()),
+  );
+  sl.registerFactory(
+    () => ScheduleFormDataCubit(
+      courseRepository: sl(),
+      teacherRepository: sl(),
+      // classroomRepository: sl(),
+    ),
   );
 
   // -- Announcement Feature --
@@ -182,17 +190,20 @@ Future<void> setupServiceLocator() async {
   );
 
   // -- Course Feature --
-  sl.registerLazySingleton<CourseRemoteDataSource>(
-    () => CourseRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
-  );
+  //================== Course Feature ==================
+  // Cubit
+  sl.registerFactory(() => CourseCubit(courseRepository: sl()));
+
+  // Repository
   sl.registerLazySingleton<CourseRepository>(
     () => CourseRepositoryImpl(remoteDataSource: sl()),
   );
-  sl.registerFactory<CourseCubit>(() => CourseCubit(courseRepository: sl()));
-  sl.registerFactory<ManageCourseCubit>(
-    () => ManageCourseCubit(courseRepository: sl()),
-  );
 
+  // Data Sources
+  sl.registerLazySingleton<CourseRemoteDataSource>(
+    () => CourseRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
+  );
+  sl.registerFactory(() => ManageCourseCubit(courseRepository: sl()));
   // -- Classroom Feature --
   sl.registerLazySingleton<ClassroomRemoteDataSource>(
     () => ClassroomRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
@@ -245,12 +256,11 @@ Future<void> setupServiceLocator() async {
 
   //================== Staff Feature ==================
   // Cubit
-// Cubit
+  // Cubit
   sl.registerFactory(() => StaffCubit(staffRepository: sl()));
   sl.registerFactory(
     () => ManageStaffCubit(staffRepository: sl()),
   ); // <-- أضف هذا السطر
-
 
   // Repository
   sl.registerLazySingleton<StaffRepository>(

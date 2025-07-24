@@ -10,9 +10,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 abstract class ScheduleRemoteDataSource {
   Future<List<ScheduleEntryModel>> getTheorySchedule(String year);
-  Future<List<ScheduleEntryModel>> getLabSchedule(String group);
+  Future<List<ScheduleEntryModel>> getLabSchedule(String group, String section);
   Future<void> addSchedule(Map<String, dynamic> scheduleData);
   Future<void> deleteSchedule(int id);
+  Future<void> updateSchedule(int id, Map<String, dynamic> scheduleData);
 }
 
 class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
@@ -94,10 +95,14 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
   }
 
   @override
-  Future<List<ScheduleEntryModel>> getLabSchedule(String group) async {
+  Future<List<ScheduleEntryModel>> getLabSchedule(
+    String group,
+    String section,
+  ) async {
     try {
       final response = await dio.get(
-        '${Constants.baseUrl}/api/schedules/lab/$group',
+        // Add the section to the API endpoint
+        '${Constants.baseUrl}/api/schedules/lab/$group/$section',
         options: await _getAuthHeaders(),
       );
       final List<dynamic> data = response.data['data'] as List;
@@ -105,6 +110,19 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
     } on DioException catch (e) {
       handleDioException(e);
       throw ServerException(message: 'Failed to load lab schedule.');
+    }
+  }
+
+  @override
+  Future<void> updateSchedule(int id, Map<String, dynamic> scheduleData) async {
+    try {
+      await dio.put(
+        '$baseUrl/api/schedules/$id',
+        data: scheduleData,
+        options: await _getAuthHeaders(),
+      );
+    } on DioException catch (e) {
+      handleDioException(e);
     }
   }
 

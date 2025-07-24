@@ -3,7 +3,7 @@ import 'package:faculity_app2/features/schedule/domain/entities/schedule_entry.d
 import 'package:flutter/material.dart';
 
 class ScheduleCard extends StatelessWidget {
-  final ScheduleEntry entry;
+  final ScheduleEntity entry;
   const ScheduleCard({super.key, required this.entry});
 
   @override

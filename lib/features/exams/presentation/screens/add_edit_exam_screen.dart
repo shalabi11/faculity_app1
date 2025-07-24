@@ -1,7 +1,7 @@
 // lib/features/admin/presentation/screens/add_edit_exam_screen.dart
 
 import 'package:faculity_app2/core/services/service_locator.dart';
-import 'package:faculity_app2/features/courses/domain/entities/course.dart';
+import 'package:faculity_app2/features/courses/domain/entities/course_entity.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_cubit.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_state.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
@@ -244,12 +244,12 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
   Widget _buildCourseDropdown() {
     return BlocBuilder<CourseCubit, CourseState>(
       builder: (context, state) {
-        if (state is CourseSuccess) {
+        if (state is CourseLoaded) {
           return DropdownButtonFormField<int>(
             value: _selectedCourseId,
             hint: const Text('اختر المادة الدراسية'),
             items:
-                state.courses.map((Course course) {
+                state.courses.map((CourseEntity course) {
                   return DropdownMenuItem<int>(
                     value: course.id,
                     child: Text(course.name),

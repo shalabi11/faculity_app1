@@ -6,10 +6,11 @@ import 'package:faculity_app2/core/widget/custom_text_field.dart';
 import 'package:faculity_app2/features/classrooms/domain/entities/classroom.dart';
 import 'package:faculity_app2/features/classrooms/presentation/cubit/classroom_cubit.dart';
 import 'package:faculity_app2/features/classrooms/presentation/cubit/classroom_state.dart';
-import 'package:faculity_app2/features/courses/domain/entities/course.dart';
+import 'package:faculity_app2/features/courses/domain/entities/course_entity.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_cubit.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_state.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/manage_schedule_cubit.dart';
+import 'package:faculity_app2/features/schedule/presentation/cubit/manage_schedule_state.dart';
 import 'package:faculity_app2/features/teachers/domain/entities/teacher.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_cubit.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_state.dart';
@@ -201,7 +202,7 @@ class _AddScheduleViewState extends State<_AddScheduleView> {
   Widget _buildCoursesDropdown() {
     return BlocBuilder<CourseCubit, CourseState>(
       builder: (context, state) {
-        if (state is CourseSuccess) {
+        if (state is CourseLoaded) {
           return CustomDropdownFormField<int>(
             value: _selectedCourseId,
             labelText: 'المادة الدراسية',

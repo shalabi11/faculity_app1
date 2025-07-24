@@ -1,5 +1,5 @@
 import 'package:faculity_app2/core/services/service_locator.dart';
-import 'package:faculity_app2/features/courses/domain/entities/course.dart';
+import 'package:faculity_app2/features/courses/domain/entities/course_entity.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_cubit.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_state.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/manage_course_cubit.dart';
@@ -25,7 +25,7 @@ class ManageCoursesScreen extends StatelessWidget {
 class _ManageCoursesView extends StatelessWidget {
   const _ManageCoursesView();
 
-  void _showDeleteDialog(BuildContext context, Course course) {
+  void _showDeleteDialog(BuildContext context, CourseEntity course) {
     showDialog(
       context: context,
       builder:
@@ -80,9 +80,9 @@ class _ManageCoursesView extends StatelessWidget {
           builder: (context, state) {
             if (state is CourseLoading)
               return const Center(child: CircularProgressIndicator());
-            if (state is CourseFailure)
+            if (state is CourseError)
               return Center(child: Text('حدث خطأ: ${state.message}'));
-            if (state is CourseSuccess) {
+            if (state is CourseLoaded) {
               if (state.courses.isEmpty)
                 return const Center(child: Text('لا توجد مواد لعرضها.'));
               return ListView.builder(

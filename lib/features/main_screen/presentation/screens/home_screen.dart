@@ -3,6 +3,7 @@ import 'package:faculity_app2/features/announcements/presentation/cubit/announce
 import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_state.dart';
 import 'package:faculity_app2/features/exams/presentation/screens/exam_result_screen.dart';
 import 'package:faculity_app2/features/main_screen/presentation/screens/exams_screen.dart';
+import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:faculity_app2/core/services/service_locator.dart';
@@ -214,7 +215,7 @@ class _TodayScheduleSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEntries(List<ScheduleEntry> entries) {
+  Widget _buildEntries(List<ScheduleEntity> entries) {
     return Column(
       children:
           entries

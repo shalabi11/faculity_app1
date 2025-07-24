@@ -3,6 +3,7 @@
 import 'package:faculity_app2/core/services/service_locator.dart';
 import 'package:faculity_app2/features/schedule/domain/entities/schedule_entry.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_cubit.dart';
+import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_state.dart';
 import 'package:faculity_app2/features/schedule/presentation/screens/add_schedule_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -162,7 +163,7 @@ class _ScheduleViewState extends State<_ScheduleView> {
 
 // بطاقة لعرض كل محاضرة في الجدول
 class _ScheduleCard extends StatelessWidget {
-  final ScheduleEntry entry;
+  final ScheduleEntity entry;
   const _ScheduleCard({required this.entry});
 
   @override

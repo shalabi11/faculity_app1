@@ -2,7 +2,7 @@
 
 import 'package:faculity_app2/features/schedule/domain/entities/schedule_entry.dart';
 
-class ScheduleEntryModel extends ScheduleEntry {
+class ScheduleEntryModel extends ScheduleEntity {
   const ScheduleEntryModel({
     required super.id,
     required super.courseName,

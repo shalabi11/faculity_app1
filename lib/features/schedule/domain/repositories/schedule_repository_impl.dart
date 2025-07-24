@@ -1,6 +1,6 @@
-// lib/features/schedule/domain/repositories/schedule_repository_impl.dart
-
+import 'package:dartz/dartz.dart';
 import 'package:faculity_app2/core/errors/exceptions.dart';
+import 'package:faculity_app2/core/errors/failures.dart';
 import 'package:faculity_app2/features/schedule/data/datasources/schedule_remote_data_source.dart';
 import 'package:faculity_app2/features/schedule/domain/entities/schedule_entry.dart';
 import 'package:faculity_app2/features/schedule/domain/repositories/schedule_repository.dart';
@@ -11,20 +11,25 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
   ScheduleRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<ScheduleEntry>> getTheorySchedule(String year) async {
+  Future<Either<Failure, List<ScheduleEntity>>> getTheorySchedule(
+    String year,
+  ) async {
     try {
-      return await remoteDataSource.getTheorySchedule(year);
+      final schedule = await remoteDataSource.getTheorySchedule(year);
+      return Right(schedule);
     } on ServerException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception('Failed to get theory schedule: ${e.toString()}');
+      return Left(ServerFailure(message: e.message));
     }
   }
 
   @override
-  Future<List<ScheduleEntry>> getLabSchedule(String group) async {
+  Future<List<ScheduleEntity>> getLabSchedule(
+    String group,
+    String section,
+  ) async {
     try {
-      return await remoteDataSource.getLabSchedule(group);
+      // Pass the section parameter to the remote data source
+      return await remoteDataSource.getLabSchedule(group, section);
     } on ServerException catch (e) {
       throw Exception(e.message);
     } catch (e) {
@@ -32,25 +37,41 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     }
   }
 
+  // ملاحظة: دوال الإضافة والحذف ستضاف هنا بنفس الطريقة لاحقاً
   @override
-  Future<void> addSchedule(Map<String, dynamic> scheduleData) async {
+  Future<Either<Failure, Unit>> addSchedule(
+    Map<String, dynamic> scheduleData,
+  ) async {
     try {
       await remoteDataSource.addSchedule(scheduleData);
+      return const Right(unit); // Return Right(unit) on success
     } on ServerException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception('Failed to add schedule entry: ${e.toString()}');
+      return Left(
+        ServerFailure(message: e.message),
+      ); // Return Left(Failure) on error
     }
   }
 
   @override
-  Future<void> deleteSchedule(int id) async {
+  Future<Either<Failure, Unit>> deleteSchedule(int id) async {
     try {
       await remoteDataSource.deleteSchedule(id);
+      return const Right(unit);
     } on ServerException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception('Failed to delete schedule entry: ${e.toString()}');
+      return Left(ServerFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updateSchedule(
+    int id,
+    Map<String, dynamic> scheduleData,
+  ) async {
+    try {
+      await remoteDataSource.updateSchedule(id, scheduleData);
+      return const Right(unit);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
     }
   }
 }
