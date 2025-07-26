@@ -7,6 +7,7 @@ import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/auth/domain/entities/user.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/exam_state.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,13 +38,13 @@ class _ExamsScheduleView extends StatelessWidget {
           if (state is ExamLoading) {
             return const LoadingList();
           }
-          if (state is ExamFailure) {
+          if (state is ExamError) {
             return ErrorState(
               message: state.message,
               onRetry: () => context.read<ExamCubit>().fetchExams(),
             );
           }
-          if (state is ExamSuccess) {
+          if (state is ExamLoaded) {
             if (state.exams.isEmpty) {
               return const EmptyState(
                 message: 'لا توجد امتحانات مجدولة حالياً.',
@@ -56,7 +57,7 @@ class _ExamsScheduleView extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 itemCount: state.exams.length,
                 itemBuilder: (context, index) {
-                  final Exam exam = state.exams[index];
+                  final ExamEntity exam = state.exams[index];
                   return _ExamCard(
                     exam: exam,
                   ).animate().fade(delay: (100 * index).ms).slideY(begin: 0.3);
@@ -72,14 +73,14 @@ class _ExamsScheduleView extends StatelessWidget {
 }
 
 class _ExamCard extends StatelessWidget {
-  final Exam exam;
+  final ExamEntity exam;
   const _ExamCard({required this.exam});
 
   @override
   Widget build(BuildContext context) {
     try {
       // --- التصحيح هنا: تحويل النص إلى تاريخ ---
-      final DateTime examDateTime = exam.examDate;
+      final DateTime examDateTime = exam.examDate as DateTime;
 
       // ثم استخدام الكائن الجديد في التنسيق
       final String displayDate = DateFormat(

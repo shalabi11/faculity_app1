@@ -1,24 +1,18 @@
-// lib/features/exams/presentation/cubit/exam_cubit.dart
-
-import 'package:bloc/bloc.dart';
-import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/domain/repositories/exams_repository.dart';
-
-part 'exam_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/exam_state.dart';
 
 class ExamCubit extends Cubit<ExamState> {
-  final ExamsRepository examsRepository;
+  final ExamRepository examRepository;
 
-  // --- تم حذف البارامتر الإضافي "repository" من هنا ---
-  ExamCubit({required this.examsRepository}) : super(ExamInitial());
+  ExamCubit({required this.examRepository}) : super(ExamInitial());
 
   Future<void> fetchExams() async {
-    try {
-      emit(ExamLoading());
-      final exams = await examsRepository.getExams();
-      emit(ExamSuccess(exams));
-    } on Exception catch (e) {
-      emit(ExamFailure(e.toString().replaceAll('Exception: ', '')));
-    }
+    emit(ExamLoading());
+    final failureOrExams = await examRepository.getAllExams();
+    failureOrExams.fold(
+      (failure) => emit(ExamError(message: failure.toString())),
+      (exams) => emit(ExamLoaded(exams: exams)),
+    );
   }
 }

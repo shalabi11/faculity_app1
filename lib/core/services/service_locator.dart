@@ -31,8 +31,14 @@ import 'package:faculity_app2/features/exams/data/datasource/exams_remote_data_s
 import 'package:faculity_app2/features/exams/domain/repositories/exams_repository.dart';
 import 'package:faculity_app2/features/exams/domain/repositories/exams_repository_impl.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/exam_distribution_cubit.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/grade_entry_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/manage_exam_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_cubit.dart';
+import 'package:faculity_app2/features/head_of_exams/data/datasources/head_of_exams_remote_data_source.dart';
+import 'package:faculity_app2/features/head_of_exams/domain/repository/head_of_exams_repository.dart';
+import 'package:faculity_app2/features/head_of_exams/domain/repository/head_of_exams_repository_impl.dart';
+import 'package:faculity_app2/features/head_of_exams/presentation/cubit/head_of_exams_cubit.dart';
 import 'package:faculity_app2/features/main_screen/presentation/cubit/home_cubit.dart';
 import 'package:faculity_app2/features/main_screen/presentation/cubit/main_screen_cubit.dart';
 import 'package:faculity_app2/features/schedule/data/datasources/schedule_remote_data_source.dart';
@@ -218,20 +224,22 @@ Future<void> setupServiceLocator() async {
     () => ManageClassroomCubit(classroomRepository: sl()),
   );
 
-  // -- Exams Feature --
-  sl.registerLazySingleton<ExamsRemoteDataSource>(
-    () => ExamsRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
+  //================== Exam Feature ==================
+  // Cubit
+  sl.registerFactory(() => ExamCubit(examRepository: sl()));
+  // Add this line
+  sl.registerFactory(() => ManageExamCubit(examsRepository: sl()));
+
+  // Repository
+  sl.registerLazySingleton<ExamRepository>(
+    () => ExamRepositoryImpl(remoteDataSource: sl()),
   );
-  sl.registerLazySingleton<ExamsRepository>(
-    () => ExamsRepositoryImpl(remoteDataSource: sl()),
+
+  // Data Sources
+  sl.registerLazySingleton<ExamRemoteDataSource>(
+    () => ExamRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
-  sl.registerFactory<ExamCubit>(() => ExamCubit(examsRepository: sl()));
-  sl.registerFactory<ManageExamCubit>(
-    () => ManageExamCubit(examsRepository: sl()),
-  );
-  sl.registerFactory<StudentExamResultsCubit>(
-    () => StudentExamResultsCubit(examsRepository: sl()),
-  );
+  sl.registerFactory(() => GradeEntryCubit(examRepository: sl()));
 
   // -- Exam Hall Assignment Feature --
   sl.registerLazySingleton<ExamHallAssignmentRemoteDataSource>(
@@ -243,6 +251,15 @@ Future<void> setupServiceLocator() async {
   );
   sl.registerFactory<ExamHallAssignmentCubit>(
     () => ExamHallAssignmentCubit(repository: sl()),
+  );
+  sl.registerFactory(() => ExamDistributionCubit(examRepository: sl()));
+  //================== Head Of Exams Feature ==================
+  sl.registerFactory(() => HeadOfExamsCubit(repository: sl()));
+  sl.registerLazySingleton<HeadOfExamsRepository>(
+    () => HeadOfExamsRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<HeadOfExamsRemoteDataSource>(
+    () => HeadOfExamsRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
 
   // -- Users Feature --

@@ -21,7 +21,7 @@ class ExamsScheduleLoading extends ExamsScheduleState {}
 
 // حالة نجاح جلب البيانات
 class ExamsScheduleSuccess extends ExamsScheduleState {
-  final List<Exam> exams;
+  final List<ExamEntity> exams;
 
   const ExamsScheduleSuccess(this.exams);
 

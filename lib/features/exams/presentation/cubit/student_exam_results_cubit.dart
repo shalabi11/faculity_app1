@@ -6,7 +6,7 @@ import 'package:faculity_app2/features/exams/domain/repositories/exams_repositor
 import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_state.dart';
 
 class StudentExamResultsCubit extends Cubit<StudentExamResultsState> {
-  final ExamsRepository examsRepository;
+  final ExamRepository examsRepository;
   StudentExamResultsCubit({required this.examsRepository})
     : super(StudentExamResultsInitial());
 
@@ -14,10 +14,10 @@ class StudentExamResultsCubit extends Cubit<StudentExamResultsState> {
   Future<void> fetchStudentResults({required int studentId}) async {
     try {
       emit(StudentExamResultsLoading());
-      final results = await examsRepository.getStudentResults(
-        studentId: studentId,
+      final results = await examsRepository.getAllExams(
+        // studentId: studentId,
       );
-      emit(StudentExamResultsSuccess(results));
+      emit(StudentExamResultsSuccess(results as List<ExamResultEntity>));
     } on Exception catch (e) {
       emit(
         StudentExamResultsFailure(e.toString().replaceAll('Exception: ', '')),

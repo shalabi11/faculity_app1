@@ -1,4 +1,7 @@
 import 'package:faculity_app2/features/courses/presentation/screens/course_list_screen.dart';
+import 'package:faculity_app2/features/exams/presentation/screens/exam_distribution_screen.dart';
+import 'package:faculity_app2/features/exams/presentation/screens/exam_list_screen.dart';
+import 'package:faculity_app2/features/head_of_exams/presentation/screens/exams_for_publishing_screen.dart';
 import 'package:faculity_app2/features/personnel_office/presentation/screens/personnel_dashboard_screen.dart';
 import 'package:faculity_app2/features/schedule/presentation/screens/schedule_dashboard_screen.dart';
 import 'package:faculity_app2/features/schedule/presentation/screens/schedule_year_selection_screen.dart';
@@ -56,7 +59,7 @@ class MyApp extends StatelessWidget {
         supportedLocales: const [Locale('ar', 'AE')],
         locale: const Locale('ar', 'AE'),
         // جعل شاشة شؤون الطلاب هي الشاشة الرئيسية للتجربة
-        home: const ScheduleYearSelectionScreen(),
+        home: const StudentAffairsDashboardScreen(),
       ),
     );
   }

@@ -42,7 +42,7 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
     super.initState();
     // بناء قائمة الشاشات وتمرير بيانات المستخدم
     _screens = [
-      HomeScreen(user: widget.user),
+      // HomeScreen(user: widget.user),
       ScheduleScreen(user: widget.user),
       ExamsScreen(user: widget.user),
       ProfileScreen(user: widget.user),

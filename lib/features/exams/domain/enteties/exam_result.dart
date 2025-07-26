@@ -1,7 +1,18 @@
-class ExamResult {
-  final int id;
-  final String courseName;
-  final double score;
+import 'package:equatable/equatable.dart';
 
-  ExamResult({required this.id, required this.courseName, required this.score});
+class ExamResultEntity extends Equatable {
+  final int resultId;
+  final int studentId;
+  final String studentName;
+  final double? score;
+
+  const ExamResultEntity({
+    required this.resultId,
+    required this.studentId,
+    required this.studentName,
+    this.score,
+  });
+
+  @override
+  List<Object?> get props => [resultId, studentId, studentName, score];
 }

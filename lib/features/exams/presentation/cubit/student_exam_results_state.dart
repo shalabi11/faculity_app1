@@ -17,7 +17,7 @@ class StudentExamResultsInitial extends StudentExamResultsState {}
 class StudentExamResultsLoading extends StudentExamResultsState {}
 
 class StudentExamResultsSuccess extends StudentExamResultsState {
-  final List<ExamResult> results;
+  final List<ExamResultEntity> results;
 
   const StudentExamResultsSuccess(this.results);
 

@@ -1,72 +1,97 @@
-// lib/features/exams/domain/repositories/exams_repository_impl.dart
-
+import 'package:dartz/dartz.dart';
 import 'package:faculity_app2/core/errors/exceptions.dart';
+import 'package:faculity_app2/core/errors/failures.dart';
 import 'package:faculity_app2/features/exams/data/datasource/exams_remote_data_source.dart';
+
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
-import 'package:faculity_app2/features/exams/domain/enteties/exam_result.dart'; // <-- أضفنا هذا
+import 'package:faculity_app2/features/exams/domain/enteties/exam_distribution_result_entity.dart';
+import 'package:faculity_app2/features/exams/domain/enteties/exam_result.dart';
+
 import 'package:faculity_app2/features/exams/domain/repositories/exams_repository.dart';
 
-class ExamsRepositoryImpl implements ExamsRepository {
-  final ExamsRemoteDataSource remoteDataSource;
-  ExamsRepositoryImpl({required this.remoteDataSource});
+class ExamRepositoryImpl implements ExamRepository {
+  final ExamRemoteDataSource remoteDataSource;
 
-  // --- دوال الامتحانات تبقى كما هي ---
+  ExamRepositoryImpl({required this.remoteDataSource});
+
   @override
-  Future<List<Exam>> getExams() async {
+  Future<Either<Failure, List<ExamEntity>>> getAllExams() async {
     try {
-      return await remoteDataSource.getExams();
+      final examList = await remoteDataSource.getAllExams();
+      return Right(examList);
     } on ServerException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception('Failed to get exams: ${e.toString()}');
+      return Left(ServerFailure(message: e.message));
     }
   }
 
   @override
-  Future<void> addExam({required Map<String, dynamic> examData}) async {
+  Future<Either<Failure, Unit>> deleteExam({required int id}) async {
     try {
-      await remoteDataSource.addExam(examData: examData);
+      await remoteDataSource.deleteExam(id: id);
+      return const Right(unit);
     } on ServerException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception('Failed to add exam: ${e.toString()}');
+      return Left(ServerFailure(message: e.message));
     }
   }
 
   @override
-  Future<void> updateExam({
+  Future<Either<Failure, Unit>> updateExam({
     required int id,
     required Map<String, dynamic> examData,
   }) async {
     try {
       await remoteDataSource.updateExam(id: id, examData: examData);
+      return const Right(unit);
     } on ServerException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception('Failed to update exam: ${e.toString()}');
+      return Left(ServerFailure(message: e.message));
     }
   }
 
   @override
-  Future<void> deleteExam({required int id}) async {
+  Future<Either<Failure, Unit>> addExam({
+    required Map<String, dynamic> examData,
+  }) async {
     try {
-      await remoteDataSource.deleteExam(id: id);
+      await remoteDataSource.addExam(examData: examData);
+      return const Right(unit);
     } on ServerException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception('Failed to delete exam: ${e.toString()}');
+      return Left(ServerFailure(message: e.message));
     }
   }
 
-  // --- وهذه هي تفاصيل تنفيذ الدالة الجديدة ---
   @override
-  Future<List<ExamResult>> getStudentResults({required int studentId}) async {
+  Future<Either<Failure, List<ExamResultEntity>>> getStudentsForExam(
+    int examId,
+  ) async {
     try {
-      return await remoteDataSource.getStudentResults(studentId: studentId);
+      final students = await remoteDataSource.getStudentsForExam(examId);
+      return Right(students);
     } on ServerException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception('Failed to get student results: ${e.toString()}');
+      return Left(ServerFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> saveGrades(
+    List<Map<String, dynamic>> grades,
+  ) async {
+    try {
+      await remoteDataSource.saveGrades(grades);
+      return const Right(unit);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ExamDistributionResultEntity>>> distributeHalls(
+    int examId,
+  ) async {
+    try {
+      final results = await remoteDataSource.distributeHalls(examId);
+      return Right(results);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
     }
   }
 }

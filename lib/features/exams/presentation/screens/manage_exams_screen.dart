@@ -1,6 +1,7 @@
 import 'package:faculity_app2/core/services/service_locator.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/exam_state.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/manage_exam_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/screens/add_edit_exam_screen.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class ManageExamsScreen extends StatelessWidget {
 class _ManageExamsView extends StatelessWidget {
   const _ManageExamsView();
 
-  void _showDeleteDialog(BuildContext context, Exam exam) {
+  void _showDeleteDialog(BuildContext context, ExamEntity exam) {
     showDialog(
       context: context,
       builder:
@@ -82,9 +83,9 @@ class _ManageExamsView extends StatelessWidget {
             if (state is ExamLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (state is ExamFailure)
+            if (state is ExamError)
               return Center(child: Text('حدث خطأ: ${state.message}'));
-            if (state is ExamSuccess) {
+            if (state is ExamLoaded) {
               if (state.exams.isEmpty)
                 return const Center(child: Text('لا توجد امتحانات لعرضها.'));
               return ListView.builder(

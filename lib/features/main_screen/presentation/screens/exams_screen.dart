@@ -57,7 +57,7 @@ class _ExamsScreenState extends State<ExamsScreen>
               ExamsScheduleScreen(user: widget.user),
 
               // التبويب الثاني: يعرض شاشة نتائج الامتحانات
-              ExamResultScreen(user: widget.user),
+              ExamSelectionForResultsScreen(),
             ],
           ),
         ),

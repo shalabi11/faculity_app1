@@ -3,6 +3,7 @@ import 'package:faculity_app2/features/exam_hall_assignments/presentation/cubit/
 import 'package:faculity_app2/features/exam_hall_assignments/presentation/cubit/exam_hall_assignment_state.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/exam_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -109,12 +110,12 @@ class _DistributeHallsViewState extends State<_DistributeHallsView> {
       builder: (context, state) {
         if (state is ExamLoading)
           return const Center(child: CircularProgressIndicator());
-        if (state is ExamSuccess) {
+        if (state is ExamLoaded) {
           return DropdownButtonFormField<int>(
             value: _selectedExamId,
             hint: const Text('اختر الامتحان'),
             items:
-                state.exams.map((Exam exam) {
+                state.exams.map((ExamEntity exam) {
                   return DropdownMenuItem<int>(
                     value: exam.id,
                     child: Text(exam.courseName),
