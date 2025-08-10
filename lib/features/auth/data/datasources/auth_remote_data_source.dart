@@ -34,8 +34,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw ServerException(message: 'خطأ غير متوقع');
       }
     } on DioException catch (e) {
+      // تم تعديل هذه الدالة لتكون أكثر دقة
       handleDioException(e);
-      print('====> DIO ERROR in DataSource: $e'); // <-- أضف هذا
+      // هذا السطر لن يتم الوصول إليه غالبًا لأن الدالة السابقة سترمي الخطأ
       throw ServerException(message: 'خطأ في الشبكة');
     }
   }
@@ -66,7 +67,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> register({required Map<String, dynamic> data}) async {
     try {
       await dio.post(
-        '$baseUrl/api/register', // <-- استخدام المتغير الجديد
+        '$baseUrl/api/register',
         data: data,
         options: Options(headers: {'Accept': 'application/json'}),
       );
@@ -80,12 +81,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final token = await secureStorage.read(key: 'auth_token');
       if (token == null) throw ServerException(message: 'No token found');
 
-      // نفترض وجود هذا الـ endpoint لجلب بيانات المستخدم
       final response = await dio.get(
         '$baseUrl/api/profile',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
-      // الـ API هنا لا تعيد 'token'، فقط 'user'
       return UserModel.fromJson({'user': response.data['data']});
     } on DioException catch (e) {
       handleDioException(e);
@@ -94,45 +93,53 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 }
 
-// --- دالة معالجة الأخطاء ---
+// --- ✨ دالة معالجة الأخطاء بعد التعديل ✨ ---
 void handleDioException(DioException e) {
+  // التحقق من أخطاء الاتصال والشهادات أولاً
+  if (e.type == DioExceptionType.connectionError ||
+      e.type == DioExceptionType.unknown ||
+      e.type == DioExceptionType.badCertificate) {
+    // التحقق إذا كان السبب هو مشكلة في شهادة SSL
+    if (e.message != null && e.message!.contains('HandshakeException')) {
+      throw ServerException(
+        message:
+            'خطأ في شهادة الأمان (SSL). تأكد من أن الخادم لديه شهادة صالحة.',
+      );
+    }
+    // إذا لم يكن خطأ شهادة، فهو على الأغلب مشكلة في الاتصال
+    throw ServerException(message: 'لا يوجد اتصال بالإنترنت أو الخادم متوقف.');
+  }
+
+  // معالجة باقي أنواع الأخطاء كما كانت
   switch (e.type) {
+    case DioExceptionType.badResponse:
+      switch (e.response?.statusCode) {
+        case 401:
+          throw ServerException(message: 'بيانات الدخول غير صحيحة.');
+        case 422:
+          // محاولة قراءة رسائل الخطأ من الخادم
+          final errors = e.response?.data['errors'] as Map<String, dynamic>?;
+          if (errors != null && errors.isNotEmpty) {
+            throw ServerException(message: errors.values.first[0]);
+          }
+          throw ServerException(message: 'البيانات المدخلة غير صحيحة.');
+        case 500:
+          throw ServerException(
+            message: 'حدث خطأ في الخادم، يرجى المحاولة مرة أخرى لاحقًا.',
+          );
+        default:
+          throw ServerException(
+            message: 'حدث خطأ غير متوقع: ${e.response?.statusCode}',
+          );
+      }
     case DioExceptionType.connectionTimeout:
     case DioExceptionType.sendTimeout:
     case DioExceptionType.receiveTimeout:
       throw ServerException(
         message: 'انتهت مهلة الاتصال، يرجى التحقق من شبكة الإنترنت.',
       );
-    case DioExceptionType.badResponse:
-      switch (e.response?.statusCode) {
-        case 400:
-          throw ServerException(
-            message: 'طلب غير صالح، يرجى مراجعة البيانات المدخلة.',
-          );
-        case 401:
-          throw ServerException(message: 'بيانات الدخول غير صحيحة.');
-        case 403:
-          throw ServerException(message: 'ليس لديك صلاحية للوصول.');
-        case 404:
-          throw ServerException(
-            message: 'تعذر العثور على الخادم، يرجى المحاولة لاحقًا.',
-          );
-        case 422:
-          throw ServerException(message: 'البيانات المدخلة غير صحيحة.');
-        case 500:
-        case 502:
-          throw ServerException(
-            message: 'حدث خطأ في الخادم، يرجى المحاولة مرة أخرى لاحقًا.',
-          );
-        default:
-          throw ServerException(message: 'حدث خطأ غير متوقع.');
-      }
-    case DioExceptionType.cancel:
-      break;
-    case DioExceptionType.unknown:
-    case DioExceptionType.connectionError:
-      throw ServerException(message: 'لا يوجد اتصال بالإنترنت.');
-    case DioExceptionType.badCertificate:
-      throw ServerException(message: 'شهادة الأمان غير صالحة.');
+    default:
+      // للحالات الأخرى مثل `cancel`
+      throw ServerException(message: 'تم إلغاء الطلب.');
   }
 }

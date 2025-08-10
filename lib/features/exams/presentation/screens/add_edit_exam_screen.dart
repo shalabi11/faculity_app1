@@ -1,13 +1,10 @@
-// lib/features/admin/presentation/screens/add_edit_exam_screen.dart
-
-import 'package:faculity_app2/core/services/service_locator.dart';
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
 import 'package:faculity_app2/features/courses/domain/entities/course_entity.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_cubit.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_state.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/manage_exam_cubit.dart';
-import 'package:flutter/cupertino.dart'; // <-- استيراد مكتبة كوبرتينو
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -50,7 +47,6 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
   @override
   void initState() {
     super.initState();
-    // --- تم تصحيح منطق تهيئة البيانات هنا ---
     _dateController = TextEditingController(
       text: _isEditMode ? widget.exam!.examDate : '',
     );
@@ -65,7 +61,7 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
     );
 
     if (_isEditMode) {
-      _selectedCourseId = widget.exam!.courseId; // <-- التصحيح الأهم
+      _selectedCourseId = widget.exam!.courseId;
       _selectedType = widget.exam!.type;
     }
   }
@@ -83,7 +79,7 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate:
-          _isEditMode
+          _isEditMode && _dateController.text.isNotEmpty
               ? DateTime.tryParse(_dateController.text) ?? DateTime.now()
               : DateTime.now(),
       firstDate: DateTime(2020),
@@ -97,7 +93,40 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
   }
 
   Future<void> _selectTime(TextEditingController controller) async {
-    // ... دالة اختيار الوقت تبقى كما هي بدون تغيير ...
+    DateTime selectedTime = DateTime.now();
+    await showModalBottomSheet(
+      context: context,
+      builder: (BuildContext builder) {
+        return SizedBox(
+          height: 250,
+          child: Column(
+            children: [
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.time,
+                  initialDateTime: DateTime.now(),
+                  onDateTimeChanged: (DateTime newTime) {
+                    selectedTime = newTime;
+                  },
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  final formattedTime = DateFormat(
+                    'HH:mm',
+                  ).format(selectedTime);
+                  setState(() {
+                    controller.text = formattedTime;
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text('تم'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _submitForm() {
@@ -124,7 +153,6 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
 
   @override
   Widget build(BuildContext context) {
-    // ... واجهة المستخدم تبقى كما هي بدون تغيير جوهري ...
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditMode ? 'تعديل الامتحان' : 'إضافة امتحان جديد'),
@@ -218,7 +246,6 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
     return BlocBuilder<CourseCubit, CourseState>(
       builder: (context, state) {
         if (state is CourseLoaded) {
-          // التأكد من أن القيمة المختارة موجودة في القائمة
           final isValueValid = state.courses.any(
             (course) => course.id == _selectedCourseId,
           );

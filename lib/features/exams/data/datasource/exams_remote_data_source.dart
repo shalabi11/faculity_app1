@@ -39,10 +39,12 @@ class ExamRemoteDataSourceImpl implements ExamRemoteDataSource {
 
       final response = await dio.get('$baseUrl/api/exams', options: options);
 
-      if (response.statusCode == 200 && response.data['data'] is List) {
-        return (response.data['data'] as List)
-            .map((examJson) => ExamModel.fromJson(examJson))
-            .toList();
+      // --- هذا هو التصحيح ---
+      // نتأكد من أن الرد هو قائمة مباشرة
+      if (response.statusCode == 200 && response.data is List) {
+        // نتعامل مع response.data مباشرة لأنها هي القائمة
+        final List<dynamic> data = response.data;
+        return data.map((examJson) => ExamModel.fromJson(examJson)).toList();
       } else {
         throw ServerException(message: 'استجابة الخادم غير متوقعة');
       }
@@ -108,15 +110,17 @@ class ExamRemoteDataSourceImpl implements ExamRemoteDataSource {
   @override
   Future<List<ExamResultModel>> getStudentsForExam(int examId) async {
     try {
-      // تأكد من أن هذا هو المسار الصحيح من Postman
       final response = await dio.get(
         '$baseUrl/api/exam-results/exam/$examId',
         options: await _getAuthHeaders(),
       );
-      if (response.statusCode == 200 && response.data['data'] is List) {
-        return (response.data['data'] as List)
-            .map((json) => ExamResultModel.fromJson(json))
-            .toList();
+
+      // --- هذا هو التصحيح ---
+      // نتأكد من أن الرد هو قائمة مباشرة
+      if (response.statusCode == 200 && response.data is List) {
+        // نتعامل مع response.data مباشرة لأنها هي القائمة
+        final List<dynamic> data = response.data;
+        return data.map((json) => ExamResultModel.fromJson(json)).toList();
       } else {
         throw ServerException(message: 'استجابة الخادم غير متوقعة');
       }

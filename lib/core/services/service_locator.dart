@@ -109,7 +109,7 @@ Future<void> setupServiceLocator() async {
 
   // --- 🌟 ميزة شؤون الطلاب (القسم الجديد والمُنظَّم) 🌟 ---
   sl.registerFactory(() => StudentAffairsCubit(getStudentDashboardData: sl()));
-  sl.registerFactory(() => affairs.AddStudentCubit(addStudentUseCase: sl()));
+  // sl.registerFactory(() => affairs.AddStudentCubit(addStudentUseCase: sl()));
   sl.registerLazySingleton(() => GetStudentDashboardData(sl()));
   sl.registerLazySingleton(() => AddStudent(sl()));
   sl.registerLazySingleton<StudentAffairsRepository>(
@@ -181,6 +181,8 @@ Future<void> setupServiceLocator() async {
     () => StudentRepositoryImpl(remoteDataSource: sl()),
   );
   sl.registerFactory<StudentCubit>(() => StudentCubit(studentRepository: sl()));
+  sl.registerFactory(() => affairs.AddStudentCubit(addStudentUseCase: sl()));
+
   // sl.registerFactory<ManageStudentCubit>(() => ManageStudentCubit(studentRepository: sl())); // <-- تم تعطيل هذا السطر المسبب للتعارض
 
   // -- Teacher Feature --

@@ -13,8 +13,10 @@ class LoginLoading extends LoginState {}
 // حالة النجاح - عند نجاح تسجيل الدخول
 // في ملف login_state.dart
 class LoginSuccess extends LoginState {
-  final User user; // <-- إضافة بيانات المستخدم
-  LoginSuccess(this.user);
+  final User user;
+  final String target;
+
+  LoginSuccess(this.user, {required this.target});
 }
 
 // حالة الفشل - عند حدوث خطأ

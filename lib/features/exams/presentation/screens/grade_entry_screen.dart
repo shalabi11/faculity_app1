@@ -30,7 +30,7 @@ class _GradeEntryView extends StatefulWidget {
 }
 
 class _GradeEntryViewState extends State<_GradeEntryView> {
-  // قائمة لتخزين الـ controllers الخاصة بكل طالب
+  // استخدام Map لتخزين الـ controllers الخاصة بكل طالب
   late Map<int, TextEditingController> _controllers;
 
   @override
@@ -41,19 +41,33 @@ class _GradeEntryViewState extends State<_GradeEntryView> {
 
   @override
   void dispose() {
+    // التخلص من كل الـ controllers لتجنب تسريب الذاكرة
     _controllers.forEach((key, controller) => controller.dispose());
     super.dispose();
   }
 
+  // دالة لتجميع وحفظ العلامات
   void _saveGrades(BuildContext context) {
     final List<Map<String, dynamic>> gradesToSave = [];
     _controllers.forEach((resultId, controller) {
+      // إضافة العلامة فقط إذا لم يكن الحقل فارغاً
       if (controller.text.isNotEmpty) {
-        gradesToSave.add({'id': resultId, 'score': controller.text});
+        gradesToSave.add({
+          'id': resultId, // ID النتيجة
+          'score': controller.text,
+        });
       }
     });
+
     if (gradesToSave.isNotEmpty) {
       context.read<GradeEntryCubit>().saveGrades(gradesToSave);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('لم يتم إدخال أي علامات جديدة.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
     }
   }
 
@@ -63,12 +77,17 @@ class _GradeEntryViewState extends State<_GradeEntryView> {
       appBar: AppBar(
         title: Text('إدخال علامات: ${widget.exam.courseName}'),
         actions: [
+          // استخدام BlocBuilder لعرض حالة زر الحفظ
           BlocBuilder<GradeEntryCubit, GradeEntryState>(
             builder: (context, state) {
               if (state is GradeSaving) {
                 return const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(color: Colors.white),
+                  padding: EdgeInsets.all(12.0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                 );
               }
               return IconButton(
@@ -89,6 +108,10 @@ class _GradeEntryViewState extends State<_GradeEntryView> {
                 backgroundColor: Colors.green,
               ),
             );
+            // إعادة تحميل البيانات بعد الحفظ لعرض أي تغييرات
+            context.read<GradeEntryCubit>().fetchStudentsForExam(
+              widget.exam.id,
+            );
           } else if (state is GradeEntryFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -102,7 +125,7 @@ class _GradeEntryViewState extends State<_GradeEntryView> {
           if (state is GradeEntryLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is GradeEntryLoaded) {
-            // تهيئة الـ controllers عند تحميل الطلاب
+            // تهيئة الـ controllers عند تحميل قائمة الطلاب
             _controllers.clear();
             for (var studentResult in state.students) {
               _controllers[studentResult.resultId] = TextEditingController(
@@ -111,13 +134,16 @@ class _GradeEntryViewState extends State<_GradeEntryView> {
             }
             return _buildStudentsList(state.students);
           }
-          return const Center(child: Text('جاري تحميل الطلاب...'));
+          return const Center(child: Text('جاري تحميل قائمة الطلاب...'));
         },
       ),
     );
   }
 
   Widget _buildStudentsList(List<ExamResultEntity> students) {
+    if (students.isEmpty) {
+      return const Center(child: Text('لا يوجد طلاب مسجلين في هذا المقرر.'));
+    }
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: students.length,

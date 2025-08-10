@@ -15,12 +15,16 @@ class ExamModel extends ExamEntity {
 
   factory ExamModel.fromJson(Map<String, dynamic> json) {
     return ExamModel(
-      id: json['id'],
-      // نفترض أن الخادم يرسل اسم المقرر داخل كائن course
-      courseName:
-          json['course'] != null ? json['course']['name'] : 'مقرر غير محدد',
+      // 1. التحويل الآمن للـ ID، مع قيمة افتراضية في حالة كان فارغاً
+      id: int.tryParse(json['id'].toString()) ?? 0,
+
+      // 2. التحويل الآمن لـ course_id
+      courseId: int.tryParse(json['course_id'].toString()) ?? 0,
+
+      // 3. قراءة اسم المقرر من الخادم
+      courseName: json['course_name'] ?? 'مقرر غير محدد',
+
       examDate: json['exam_date'] ?? '',
-      courseId: json['course_id'], // <-- أضف هذا السطر
       startTime: json['start_time'] ?? '',
       endTime: json['end_time'] ?? '',
       type: json['type'] ?? 'غير محدد',

@@ -10,13 +10,17 @@ class ExamResultModel extends ExamResultEntity {
 
   factory ExamResultModel.fromJson(Map<String, dynamic> json) {
     return ExamResultModel(
-      // نفترض أن الخادم يرسل هذه الحقول
-      resultId:
-          json['result_id'] ??
-          0, // ID النتيجة نفسها، قد يكون 0 إذا لم توجد علامة بعد
-      studentId: json['student_id'],
+      // 1. التحويل الآمن للـ ID، مع قيمة افتراضية في حالة كان فارغاً
+      // نفترض أن 'id' القادم من الخادم هو معرّف النتيجة
+      resultId: int.tryParse(json['id'].toString()) ?? 0,
+
+      // 2. التحويل الآمن لـ student_id، مع قيمة افتراضية لأنه غير موجود حالياً
+      studentId: int.tryParse(json['student_id'].toString()) ?? 0,
+
+      // 3. قراءة اسم الطالب
       studentName: json['student_name'] ?? 'اسم غير متوفر',
-      // تحويل آمن للعلامة، قد تكون غير موجودة (null)
+
+      // 4. التحويل الآمن للعلامة
       score:
           json['score'] != null
               ? double.tryParse(json['score'].toString())

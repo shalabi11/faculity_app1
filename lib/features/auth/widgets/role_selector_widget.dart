@@ -1,4 +1,3 @@
-// lib/features/auth/presentation/widgets/role_selector_widget.dart
 import 'package:flutter/material.dart';
 
 class RoleSelectorWidget extends StatefulWidget {
@@ -11,7 +10,7 @@ class RoleSelectorWidget extends StatefulWidget {
 }
 
 class _RoleSelectorWidgetState extends State<RoleSelectorWidget> {
-  int _selectedIndex = 0;
+  String _selectedRole = 'student';
   final List<Map<String, dynamic>> _roles = [
     {'name': 'طالب', 'value': 'student', 'icon': Icons.person_outline},
     {'name': 'دكتور', 'value': 'teacher', 'icon': Icons.school_outlined},
@@ -20,6 +19,23 @@ class _RoleSelectorWidgetState extends State<RoleSelectorWidget> {
       'name': 'مسؤول',
       'value': 'admin',
       'icon': Icons.admin_panel_settings_outlined,
+    },
+    {'name': 'عميد', 'value': 'dean', 'icon': Icons.star_outline},
+    {
+      'name': 'شؤون طلاب',
+      'value': 'studentAffairs',
+      'icon': Icons.groups_outlined,
+    },
+    {
+      'name': 'ذاتية',
+      'value': 'personnel_office',
+      'icon': Icons.badge_outlined,
+    },
+    {'name': 'امتحانات', 'value': 'exams', 'icon': Icons.edit_note_outlined},
+    {
+      'name': 'رئيس امتحانات',
+      'value': 'head_of_exam',
+      'icon': Icons.grading_outlined,
     },
   ];
 
@@ -31,62 +47,82 @@ class _RoleSelectorWidgetState extends State<RoleSelectorWidget> {
         const Text(
           'تسجيل الدخول كـ:',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             color: Colors.black54,
           ),
         ),
         const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(_roles.length, (index) {
-            bool isSelected = _selectedIndex == index;
-            return Expanded(
-              child: GestureDetector(
+        // تم تغليف الـ ListView بـ SizedBox لإعطائه ارتفاعاً محدداً
+        SizedBox(
+          height: 80,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _roles.length,
+            itemBuilder: (context, index) {
+              final role = _roles[index];
+              final isSelected = _selectedRole == role['value'];
+              return GestureDetector(
                 onTap: () {
                   setState(() {
-                    _selectedIndex = index;
-                    widget.onRoleSelected(_roles[index]['value']);
+                    _selectedRole = role['value'];
                   });
+                  widget.onRoleSelected(role['value']);
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
+                  width: 75, // تحديد عرض ثابت لكل عنصر
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 8,
+                    vertical: 8,
+                    horizontal: 4,
                   ),
                   decoration: BoxDecoration(
                     color:
-                        isSelected ? Colors.blue.shade50 : Colors.grey.shade100,
+                        isSelected
+                            ? Theme.of(context).primaryColor.withOpacity(0.1)
+                            : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? Colors.blue : Colors.grey.shade300,
+                      color:
+                          isSelected
+                              ? Theme.of(context).primaryColor
+                              : Colors.grey.shade300,
                       width: isSelected ? 2 : 1,
                     ),
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        _roles[index]['icon'],
-                        color: isSelected ? Colors.blue : Colors.grey.shade600,
+                        role['icon'],
+                        color:
+                            isSelected
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.shade600,
+                        size: 28,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _roles[index]['name'],
+                        role['name'],
+                        textAlign: TextAlign.center,
                         style: TextStyle(
+                          fontSize: 12,
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.normal,
                           color:
-                              isSelected ? Colors.blue : Colors.grey.shade800,
+                              isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey.shade800,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-              ),
-            );
-          }),
+              );
+            },
+          ),
         ),
       ],
     );
