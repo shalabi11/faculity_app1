@@ -1,4 +1,9 @@
+// lib/features/head_of_exams/presentation/screens/exams_for_publishing_screen.dart
+
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
+// ✨ 1. استيراد شاشة إدخال العلامات
+import 'package:faculity_app2/features/exams/presentation/screens/grade_entry_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
@@ -46,7 +51,14 @@ class ExamsForPublishingScreen extends StatelessWidget {
               }
               return _buildExamsList(context, state.exams);
             } else if (state is HeadOfExamsFailure) {
-              return Center(child: Text(state.message));
+              return ErrorState(
+                message: state.message,
+                onRetry:
+                    () =>
+                        context
+                            .read<HeadOfExamsCubit>()
+                            .fetchPublishableExams(),
+              );
             }
             return const Center(child: Text('جاري تحميل الامتحانات...'));
           },
@@ -80,27 +92,34 @@ class ExamsForPublishingScreen extends StatelessWidget {
                 Text('تاريخ الامتحان: ${exam.examDate}'),
                 const Divider(),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  // 1. استخدام MainAxisAlignment.spaceBetween للمحاذاة
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton.icon(
                       icon: const Icon(Icons.rate_review_outlined),
                       label: const Text('مراجعة العلامات'),
                       onPressed: () {
-                        // يمكنك هنا الانتقال لشاشة عرض العلامات للقراءة فقط
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => GradeEntryScreen(exam: exam),
+                          ),
+                        );
                       },
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
+                    // 2. تحويل الزر إلى TextButton وتغيير لونه
+                    TextButton.icon(
                       icon: const Icon(Icons.publish_outlined),
                       label: const Text('نشر النتائج'),
+                      style: TextButton.styleFrom(
+                        foregroundColor:
+                            Colors.green[700], // تغيير لون النص والأيقونة
+                      ),
                       onPressed: () {
                         context.read<HeadOfExamsCubit>().publishResults(
                           exam.id,
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green[700],
-                      ),
                     ),
                   ],
                 ),

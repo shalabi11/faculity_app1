@@ -1,21 +1,21 @@
-// lib/features/student/presentation/cubit/manage_student_state.dart
+// // lib/features/student/presentation/cubit/manage_student_state.dart
 
-part of 'manage_student_cubit.dart';
+// part of 'manage_student_cubit.dart';
 
-abstract class ManageStudentState {
-  String? message;
-}
+// abstract class ManageStudentState {
+//   String? message;
+// }
 
-class ManageStudentInitial extends ManageStudentState {}
+// class ManageStudentInitial extends ManageStudentState {}
 
-class ManageStudentLoading extends ManageStudentState {}
+// class ManageStudentLoading extends ManageStudentState {}
 
-class ManageStudentSuccess extends ManageStudentState {
-  final String message;
-  ManageStudentSuccess(this.message);
-}
+// class ManageStudentSuccess extends ManageStudentState {
+//   final String message;
+//   ManageStudentSuccess(this.message);
+// }
 
-class ManageStudentFailure extends ManageStudentState {
-  final String message;
-  ManageStudentFailure(this.message);
-}
+// class ManageStudentFailure extends ManageStudentState {
+//   final String message;
+//   ManageStudentFailure(this.message);
+// }

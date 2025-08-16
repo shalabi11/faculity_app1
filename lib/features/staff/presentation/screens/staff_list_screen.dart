@@ -1,3 +1,4 @@
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
@@ -45,7 +46,7 @@ class StaffListScreen extends StatelessWidget {
           child: BlocBuilder<StaffCubit, StaffState>(
             builder: (context, state) {
               if (state is StaffLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: LoadingList());
               } else if (state is StaffLoaded) {
                 return _buildStaffList(context, state.staff);
               } else if (state is StaffError) {

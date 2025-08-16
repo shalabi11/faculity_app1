@@ -1,12 +1,13 @@
+// lib/features/student_affairs/data/repositories/student_affairs_repository_impl.dart
+
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:faculity_app2/core/errors/exceptions.dart';
 import 'package:faculity_app2/core/errors/failures.dart';
 import 'package:faculity_app2/core/platform/network_info.dart';
-import 'package:faculity_app2/features/student/data/models/student_model.dart';
+import 'package:faculity_app2/features/student/domain/entities/student.dart';
 import 'package:faculity_app2/features/student_affairs/data/datasource/student_affairs_remote_data_source.dart';
 import 'package:faculity_app2/features/student_affairs/data/repositories/student_affairs_repository.dart';
-import 'package:faculity_app2/features/student_affairs/domain/entities/student_dashboard_entity.dart';
 
 class StudentAffairsRepositoryImpl implements StudentAffairsRepository {
   final StudentAffairsRemoteDataSource remoteDataSource;
@@ -18,19 +19,12 @@ class StudentAffairsRepositoryImpl implements StudentAffairsRepository {
   });
 
   @override
-  Future<Either<Failure, StudentDashboardEntity>>
-  getStudentDashboardData() async {
+  Future<Either<Failure, List<Student>>> getStudents() async {
     if (await networkInfo.isConnected) {
       try {
-        final studentCountsMap =
-            await remoteDataSource.getStudentDashboardData();
-        final dashboardEntity = StudentDashboardEntity(
-          studentsByYear: studentCountsMap,
-        );
-        return Right(dashboardEntity);
+        final students = await remoteDataSource.getStudents();
+        return Right(students);
       } on ServerException catch (e) {
-        // -- التعديل هنا --
-        // نقوم بتمرير الرسالة التفصيلية إلى طبقة الـ Failure
         return Left(ServerFailure(message: e.message));
       }
     } else {
@@ -39,16 +33,50 @@ class StudentAffairsRepositoryImpl implements StudentAffairsRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> addStudent(
-    StudentModel student,
+  Future<Either<Failure, Unit>> addStudent({
+    required Map<String, dynamic> studentData,
     File? image,
-  ) async {
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        await remoteDataSource.addStudent(student, image);
+        await remoteDataSource.addStudent(
+          studentData: studentData,
+          image: image,
+        );
         return const Right(unit);
-      } on ServerException {
-        return Left(ServerFailure(message: ''));
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
+      }
+    } else {
+      return Left(OfflineFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updateStudent({
+    required int id,
+    required Map<String, dynamic> studentData,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.updateStudent(id: id, studentData: studentData);
+        return const Right(unit);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
+      }
+    } else {
+      return Left(OfflineFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteStudent({required int id}) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.deleteStudent(id: id);
+        return const Right(unit);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
       }
     } else {
       return Left(OfflineFailure());

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/announcements/domain/entities/announcement.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/anage_announcements_cubit.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/manage_announcements_state.dart';
@@ -132,8 +133,8 @@ class _AddEditAnnouncementScreenState extends State<AddEditAnnouncementScreen> {
                       onPressed: () => _submitForm(context),
                       child:
                           isLoading
-                              ? const CircularProgressIndicator(
-                                color: Colors.white,
+                              ? const LoadingList(
+                                // color: Colors.white,
                               )
                               : const Text('حفظ'),
                     ),

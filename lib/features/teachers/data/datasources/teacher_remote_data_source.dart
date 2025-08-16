@@ -1,9 +1,10 @@
-// lib/features/teachers/data/datasource/teacher_remote_data_source.dart
+// lib/features/teachers/data/datasources/teacher_remote_data_source.dart
 
 import 'package:dio/dio.dart';
 import 'package:faculity_app2/core/errors/exceptions.dart';
 import 'package:faculity_app2/core/utils/constant.dart';
 import 'package:faculity_app2/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:faculity_app2/features/schedule/data/models/schedule_entry_model.dart';
 import 'package:faculity_app2/features/teachers/data/models/teachers_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -15,6 +16,8 @@ abstract class TeacherRemoteDataSource {
     required Map<String, dynamic> teacherData,
   });
   Future<void> deleteTeacher({required int id});
+  // ✨ --- تم تعديل نوع الإرجاع هنا --- ✨
+  Future<List<ScheduleEntryModel>> getTeacherSchedule(int teacherId);
 }
 
 class TeacherRemoteDataSourceImpl implements TeacherRemoteDataSource {
@@ -50,7 +53,6 @@ class TeacherRemoteDataSourceImpl implements TeacherRemoteDataSource {
     }
   }
 
-  // --- تم تعديل هذه الدالة ---
   @override
   Future<void> addTeacher({required Map<String, dynamic> teacherData}) async {
     try {
@@ -60,25 +62,10 @@ class TeacherRemoteDataSourceImpl implements TeacherRemoteDataSource {
         options: await _getAuthHeaders(),
       );
     } on DioException catch (e) {
-      // التعامل بشكل خاص مع أخطاء التحقق
-      if (e.response?.statusCode == 422) {
-        final errors = e.response?.data['errors'] as Map<String, dynamic>?;
-        if (errors != null) {
-          final errorMessages = errors.entries
-              .map((entry) {
-                final field = entry.key;
-                final messages = (entry.value as List).join(', ');
-                return '$field: $messages';
-              })
-              .join('\n');
-          throw ServerException(message: 'خطأ في التحقق:\n$errorMessages');
-        }
-      }
-      handleDioException(e); // التعامل مع باقي الأخطاء
+      handleDioException(e);
     }
   }
 
-  // --- وتم تعديل هذه الدالة أيضًا ---
   @override
   Future<void> updateTeacher({
     required int id,
@@ -92,19 +79,6 @@ class TeacherRemoteDataSourceImpl implements TeacherRemoteDataSource {
         options: await _getAuthHeaders(),
       );
     } on DioException catch (e) {
-      if (e.response?.statusCode == 422) {
-        final errors = e.response?.data['errors'] as Map<String, dynamic>?;
-        if (errors != null) {
-          final errorMessages = errors.entries
-              .map((entry) {
-                final field = entry.key;
-                final messages = (entry.value as List).join(', ');
-                return '$field: $messages';
-              })
-              .join('\n');
-          throw ServerException(message: 'خطأ في التحقق:\n$errorMessages');
-        }
-      }
       handleDioException(e);
     }
   }
@@ -118,6 +92,25 @@ class TeacherRemoteDataSourceImpl implements TeacherRemoteDataSource {
       );
     } on DioException catch (e) {
       handleDioException(e);
+    }
+  }
+
+  @override
+  Future<List<ScheduleEntryModel>> getTeacherSchedule(int teacherId) async {
+    try {
+      final response = await dio.get(
+        '$baseUrl/api/schedules/teacher/$teacherId',
+        options: await _getAuthHeaders(),
+      );
+      if (response.statusCode == 200 && response.data['data'] is List) {
+        final List<dynamic> data = response.data['data'];
+        return data.map((json) => ScheduleEntryModel.fromJson(json)).toList();
+      } else {
+        throw ServerException(message: 'Failed to load teacher schedule');
+      }
+    } on DioException catch (e) {
+      handleDioException(e);
+      throw ServerException(message: 'Network error');
     }
   }
 }

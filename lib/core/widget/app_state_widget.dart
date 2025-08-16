@@ -1,11 +1,10 @@
-// lib/core/widget/app_states_widgets.dart
+// lib/core/widget/app_state_widget.dart
 
 import 'package:faculity_app2/core/theme/app_color.dart';
 import 'package:faculity_app2/core/widget/shimmer_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-// --- واجهة التحميل (Shimmer) ---
 class LoadingList extends StatelessWidget {
   final int itemCount;
   final double cardHeight;
@@ -14,15 +13,12 @@ class LoadingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ShimmerLoading(
-      child: ListView.builder(
-        // --- التصحيح النهائي هنا ---
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        // --------------------------
-        padding: EdgeInsets.zero, // إزالة الحواف الداخلية لتجنب التداخل
-        itemCount: itemCount,
-        itemBuilder:
-            (context, index) => Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: List.generate(
+            itemCount,
+            (index) => Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
                 side: BorderSide(color: Colors.grey.shade200),
@@ -31,12 +27,13 @@ class LoadingList extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 12),
               child: SizedBox(height: cardHeight),
             ),
+          ),
+        ),
       ),
     );
   }
 }
 
-// --- واجهة عرض في حال كانت القائمة فارغة ---
 class EmptyState extends StatelessWidget {
   final String message;
   final IconData icon;
@@ -68,7 +65,6 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-// --- واجهة عرض في حال حدوث خطأ ---
 class ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

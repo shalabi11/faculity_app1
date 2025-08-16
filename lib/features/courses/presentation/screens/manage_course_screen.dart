@@ -1,9 +1,14 @@
+// lib/features/courses/presentation/screens/manage_course_screen.dart
+
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
+import 'package:faculity_app2/features/courses/presentation/cubit/course_state.dart';
+import 'package:faculity_app2/features/courses/widget/courses_by_year_list.dart';
 import 'package:faculity_app2/features/courses/domain/entities/course_entity.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_cubit.dart';
-import 'package:faculity_app2/features/courses/presentation/cubit/course_state.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/manage_course_cubit.dart';
 import 'package:faculity_app2/features/courses/presentation/screens/add_edit_course_screen.dart';
+// ✨ 1. استيراد الويدجت الجديد
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -78,44 +83,33 @@ class _ManageCoursesView extends StatelessWidget {
         },
         child: BlocBuilder<CourseCubit, CourseState>(
           builder: (context, state) {
-            if (state is CourseLoading)
+            if (state is CourseLoading) {
               return const Center(child: CircularProgressIndicator());
-            if (state is CourseError)
-              return Center(child: Text('حدث خطأ: ${state.message}'));
+            }
+            if (state is CourseError) {
+              return ErrorState(
+                message: state.message,
+                onRetry: () => context.read<CourseCubit>().fetchCourses(),
+              );
+            }
             if (state is CourseLoaded) {
-              if (state.courses.isEmpty)
-                return const Center(child: Text('لا توجد مواد لعرضها.'));
-              return ListView.builder(
-                itemCount: state.courses.length,
-                itemBuilder: (context, index) {
-                  final course = state.courses[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+              // ✨ 2. استخدام الويدجت الجديد هنا
+              return CoursesByYearList(
+                courses: state.courses,
+                onCourseTap: (course) async {
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => AddEditCourseScreen(course: course),
                     ),
-                    child: ListTile(
-                      title: Text(course.name),
-                      subtitle: Text(
-                        'القسم: ${course.department} | السنة: ${course.year}',
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
-                        ),
-                        onPressed: () => _showDeleteDialog(context, course),
-                      ),
-                      onTap: () async {
-                        final result = await Navigator.of(context).push<bool>(
-                          MaterialPageRoute(
-                            builder: (_) => AddEditCourseScreen(course: course),
-                          ),
-                        );
-                        if (result == true)
-                          context.read<CourseCubit>().fetchCourses();
-                      },
-                    ),
+                  );
+                  if (result == true) {
+                    context.read<CourseCubit>().fetchCourses();
+                  }
+                },
+                trailingBuilder: (course) {
+                  return IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () => _showDeleteDialog(context, course),
                   );
                 },
               );

@@ -11,7 +11,7 @@ import 'package:faculity_app2/features/exam_hall_assignments/presentation/screen
 import 'package:faculity_app2/features/exams/presentation/screens/manage_exams_screen.dart';
 import 'package:faculity_app2/features/schedule/presentation/screens/manage_schedule_screen.dart';
 import 'package:faculity_app2/features/student/presentation/screens/mange_student_screen.dart';
-import 'package:faculity_app2/features/teachers/presentation/screens/manage_teachers_screen.dart';
+import 'package:faculity_app2/features/teachers/presentation/screens/add_edit_teacher_screen/manage_teachers_screen.dart';
 import 'package:faculity_app2/features/users/presentation/screens/manage_users_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -22,11 +22,11 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<DashboardItem> items = [
-      DashboardItem(
-        title: 'إدارة الطلاب',
-        icon: Icons.people_outline,
-        onTap: () => _navigateTo(context, const ManageStudentsScreen()),
-      ),
+      // DashboardItem(
+      //   title: 'إدارة الطلاب',
+      //   icon: Icons.people_outline,
+      //   onTap: () => _navigateTo(context, const ManageStudentsScreen()),
+      // ),
       DashboardItem(
         title: 'إدارة المدرسين',
         icon: Icons.school_outlined,

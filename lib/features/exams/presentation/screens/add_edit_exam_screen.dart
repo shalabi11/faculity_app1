@@ -1,4 +1,9 @@
+// lib/features/exams/presentation/screens/add_edit_exam_screen.dart
+
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
+// ✨ 1. استيراد الويدجت الجديد
+import 'package:faculity_app2/core/widget/year_dropdown_form_field.dart';
 import 'package:faculity_app2/features/courses/domain/entities/course_entity.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_cubit.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/course_state.dart';
@@ -38,9 +43,10 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
   late TextEditingController _dateController;
   late TextEditingController _startTimeController;
   late TextEditingController _endTimeController;
-  late TextEditingController _targetYearController;
   int? _selectedCourseId;
   String? _selectedType;
+  // ✨ 2. تحويل متغير السنة إلى متغير عادي
+  String? _selectedYear;
 
   bool get _isEditMode => widget.exam != null;
 
@@ -56,13 +62,11 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
     _endTimeController = TextEditingController(
       text: widget.exam?.endTime ?? '',
     );
-    _targetYearController = TextEditingController(
-      text: widget.exam?.targetYear ?? '',
-    );
 
     if (_isEditMode) {
       _selectedCourseId = widget.exam!.courseId;
       _selectedType = widget.exam!.type;
+      _selectedYear = widget.exam!.targetYear;
     }
   }
 
@@ -71,7 +75,6 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
     _dateController.dispose();
     _startTimeController.dispose();
     _endTimeController.dispose();
-    _targetYearController.dispose();
     super.dispose();
   }
 
@@ -137,7 +140,8 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
         'start_time': _startTimeController.text,
         'end_time': _endTimeController.text,
         'type': _selectedType,
-        'target_year': _targetYearController.text,
+        // ✨ 3. استخدام القيمة الجديدة للسنة
+        'target_year': _selectedYear,
       };
 
       if (_isEditMode) {
@@ -183,10 +187,14 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
             children: [
               _buildCourseDropdown(),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _targetYearController,
-                decoration: const InputDecoration(labelText: 'السنة المستهدفة'),
-                validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
+              // ✨ --- 4. استدعاء الويدجت الجديد هنا --- ✨
+              YearDropdownFormField(
+                selectedYear: _selectedYear,
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedYear = newValue;
+                  });
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -243,6 +251,7 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
   }
 
   Widget _buildCourseDropdown() {
+    // ... (This function remains unchanged)
     return BlocBuilder<CourseCubit, CourseState>(
       builder: (context, state) {
         if (state is CourseLoaded) {
@@ -274,6 +283,7 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
   }
 
   Widget _buildTypeDropdown() {
+    // ... (This function remains unchanged)
     return DropdownButtonFormField<String>(
       value: _selectedType,
       hint: const Text('اختر نوع الامتحان'),

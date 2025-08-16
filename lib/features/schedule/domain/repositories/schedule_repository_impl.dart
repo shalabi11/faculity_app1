@@ -1,3 +1,4 @@
+// lib/features/schedule/domain/repositories/schedule_repository_impl.dart
 import 'package:dartz/dartz.dart';
 import 'package:faculity_app2/core/errors/exceptions.dart';
 import 'package:faculity_app2/core/errors/failures.dart';
@@ -19,36 +20,35 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       return Right(schedule);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'حدث خطأ غير متوقع'));
     }
   }
 
   @override
-  Future<List<ScheduleEntity>> getLabSchedule(
+  Future<Either<Failure, List<ScheduleEntity>>> getLabSchedule(
     String group,
     String section,
   ) async {
     try {
-      // Pass the section parameter to the remote data source
-      return await remoteDataSource.getLabSchedule(group, section);
+      final schedule = await remoteDataSource.getLabSchedule(group, section);
+      return Right(schedule);
     } on ServerException catch (e) {
-      throw Exception(e.message);
+      return Left(ServerFailure(message: e.message));
     } catch (e) {
-      throw Exception('Failed to get lab schedule: ${e.toString()}');
+      return Left(ServerFailure(message: 'حدث خطأ غير متوقع'));
     }
   }
 
-  // ملاحظة: دوال الإضافة والحذف ستضاف هنا بنفس الطريقة لاحقاً
   @override
   Future<Either<Failure, Unit>> addSchedule(
     Map<String, dynamic> scheduleData,
   ) async {
     try {
       await remoteDataSource.addSchedule(scheduleData);
-      return const Right(unit); // Return Right(unit) on success
+      return const Right(unit);
     } on ServerException catch (e) {
-      return Left(
-        ServerFailure(message: e.message),
-      ); // Return Left(Failure) on error
+      return Left(ServerFailure(message: e.message));
     }
   }
 

@@ -19,7 +19,7 @@ class AnnouncementsListScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => sl<AnnouncementCubit>()..fetchAnnouncements(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('كل الإعلانات')),
+        // appBar: AppBar(title: const Text('كل الإعلانات')),
         body: BlocBuilder<AnnouncementCubit, AnnouncementState>(
           builder: (context, state) {
             // 1. حالة التحميل

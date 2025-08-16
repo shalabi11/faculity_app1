@@ -1,6 +1,7 @@
 // lib/features/admin/presentation/screens/add_schedule_screen.dart
 
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/core/widget/custom_dropdown_form_field.dart';
 import 'package:faculity_app2/core/widget/custom_text_field.dart';
 import 'package:faculity_app2/features/classrooms/domain/entities/classroom.dart';
@@ -180,7 +181,7 @@ class _AddScheduleViewState extends State<_AddScheduleView> {
               BlocBuilder<ManageScheduleCubit, ManageScheduleState>(
                 builder: (context, state) {
                   if (state is ManageScheduleLoading)
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingList());
                   return ElevatedButton(
                     onPressed: _submitForm,
                     child: const Text('حفظ المحاضرة'),
@@ -219,7 +220,7 @@ class _AddScheduleViewState extends State<_AddScheduleView> {
             onChanged: (v) => setState(() => _selectedCourseId = v),
           );
         }
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: LoadingList());
       },
     );
   }
@@ -244,7 +245,7 @@ class _AddScheduleViewState extends State<_AddScheduleView> {
             onChanged: (v) => setState(() => _selectedTeacherId = v),
           );
         }
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: LoadingList());
       },
     );
   }
@@ -269,7 +270,7 @@ class _AddScheduleViewState extends State<_AddScheduleView> {
             onChanged: (v) => setState(() => _selectedClassroomId = v),
           );
         }
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: LoadingList());
       },
     );
   }

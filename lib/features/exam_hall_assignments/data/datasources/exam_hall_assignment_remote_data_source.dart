@@ -55,20 +55,32 @@ class ExamHallAssignmentRemoteDataSourceImpl
         options: await _getAuthHeaders(),
       );
 
-      // --- سطر الطباعة للتشخيص ---
-      print('RAW ASSIGNMENTS RESPONSE: ${response.data}');
-
+      // ✨ --- تم التعديل الكامل هنا --- ✨
       if (response.statusCode == 200) {
-        // بناءً على خبرتنا السابقة، سنتعامل مع البيانات بأمان
-        final List<dynamic> data = response.data['assignments'] ?? [];
-        return data
-            .map((json) => ExamHallAssignmentModel.fromJson(json))
-            .toList();
+        // التحقق من نوع البيانات المستقبلة
+        if (response.data is List) {
+          // إذا كانت قائمة مباشرة، تعامل معها مباشرة
+          final List<dynamic> data = response.data;
+          return data
+              .map((json) => ExamHallAssignmentModel.fromJson(json))
+              .toList();
+        } else if (response.data is Map<String, dynamic> &&
+            response.data['assignments'] is List) {
+          // إذا كانت خريطة تحتوي على مفتاح 'assignments'، استخرج القائمة منها
+          final List<dynamic> data = response.data['assignments'];
+          return data
+              .map((json) => ExamHallAssignmentModel.fromJson(json))
+              .toList();
+        } else {
+          // في حال كانت بنية البيانات غير متوقعة
+          throw ServerException(message: 'Failed to parse hall assignments');
+        }
       } else {
         throw ServerException(message: 'Failed to load hall assignments');
       }
     } on DioException catch (e) {
       handleDioException(e);
+      // هذا السطر لن يتم الوصول إليه غالباً لأن الدالة السابقة سترمي الخطأ
       throw ServerException(message: 'Network error');
     }
   }

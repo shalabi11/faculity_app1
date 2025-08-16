@@ -1,3 +1,4 @@
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/schedule/domain/entities/schedule_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,7 +59,7 @@ class ScheduleScreen extends StatelessWidget {
           child: BlocBuilder<ScheduleCubit, ScheduleState>(
             builder: (context, state) {
               if (state is ScheduleLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: LoadingList());
               } else if (state is ScheduleSuccess) {
                 return _buildScheduleView(context, state.schedule);
               } else if (state is ScheduleFailure) {

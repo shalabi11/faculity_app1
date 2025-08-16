@@ -32,6 +32,7 @@ import 'package:faculity_app2/features/exams/domain/repositories/exams_repositor
 import 'package:faculity_app2/features/exams/domain/repositories/exams_repository_impl.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_distribution_cubit.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/exams_dashboard_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/grade_entry_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/manage_exam_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_cubit.dart';
@@ -39,8 +40,9 @@ import 'package:faculity_app2/features/head_of_exams/data/datasources/head_of_ex
 import 'package:faculity_app2/features/head_of_exams/domain/repository/head_of_exams_repository.dart';
 import 'package:faculity_app2/features/head_of_exams/domain/repository/head_of_exams_repository_impl.dart';
 import 'package:faculity_app2/features/head_of_exams/presentation/cubit/head_of_exams_cubit.dart';
-import 'package:faculity_app2/features/main_screen/presentation/cubit/home_cubit.dart';
+import 'package:faculity_app2/features/head_of_exams/presentation/cubit/head_of_exams_dashboard_cubit.dart';
 import 'package:faculity_app2/features/main_screen/presentation/cubit/main_screen_cubit.dart';
+import 'package:faculity_app2/features/personnel_office/presentation/cubit/personnel_profile_cubit.dart';
 import 'package:faculity_app2/features/schedule/data/datasources/schedule_remote_data_source.dart';
 import 'package:faculity_app2/features/schedule/domain/repositories/schedule_repository.dart';
 import 'package:faculity_app2/features/schedule/domain/repositories/schedule_repository_impl.dart';
@@ -55,18 +57,21 @@ import 'package:faculity_app2/features/staff/presentation/cubit/staff_cubit.dart
 import 'package:faculity_app2/features/student/data/datasource/student_remote_data_source.dart';
 import 'package:faculity_app2/features/student/domain/repositories/student_repository.dart';
 import 'package:faculity_app2/features/student/domain/repositories/student_repository_impl.dart';
-import 'package:faculity_app2/features/student/presentation/cubit/manage_student_cubit.dart';
 import 'package:faculity_app2/features/student/presentation/cubit/student_cubit.dart';
 import 'package:faculity_app2/features/student_affairs/data/datasource/student_affairs_remote_data_source.dart';
 import 'package:faculity_app2/features/student_affairs/data/repositories/student_affairs_repository.dart';
 import 'package:faculity_app2/features/student_affairs/data/repositories/student_affairs_repository_impl.dart';
 import 'package:faculity_app2/features/student_affairs/domain/entities/usecases/add_student.dart';
 import 'package:faculity_app2/features/student_affairs/domain/entities/usecases/get_student_dashboard_data.dart';
+import 'package:faculity_app2/features/student_affairs/presentation/cubit/student_affairs_dashboard_cubit.dart';
 import 'package:faculity_app2/features/teachers/data/datasources/teacher_remote_data_source.dart';
 import 'package:faculity_app2/features/teachers/domain/repositories/teacher_repository.dart';
 import 'package:faculity_app2/features/teachers/domain/repositories/teacher_repository_impl.dart';
-import 'package:faculity_app2/features/teachers/presentation/cubit/manage_teacher_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/manage_teacher/manage_teacher_cubit.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_job/teacher_courses_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_job/teacher_profile_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_job/teacher_schedule_cubit.dart';
 import 'package:faculity_app2/features/users/data/datasources/app_user_remote_data_source.dart';
 import 'package:faculity_app2/features/users/domain/repositories/app_user_repository.dart';
 import 'package:faculity_app2/features/users/domain/repositories/app_user_repository_impl.dart';
@@ -75,22 +80,16 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-// --- استيراد ملفات "شؤون الطلاب" (الميزة الجديدة) ---
-
 import 'package:faculity_app2/features/student_affairs/presentation/cubit/manage_student_cubit.dart'
-    as affairs; // <-- استخدام alias لتجنب التعارض
+    as affairs;
 import 'package:faculity_app2/features/student_affairs/presentation/cubit/student_affairs_cubit.dart';
-// --- نهاية الاستيرادات الجديدة ---
 
 final sl = GetIt.instance;
 
 Future<void> setupServiceLocator() async {
   await sl.reset(dispose: false);
 
-  // =====================
-  //  External & Core
-  // =====================
+  // External & Core
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => Dio());
@@ -98,30 +97,38 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => InternetConnectionChecker.createInstance());
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
 
-  // =====================
-  //  Theme
-  // =====================
+  // Theme
   sl.registerFactory<ThemeCubit>(() => ThemeCubit(sharedPreferences: sl()));
 
-  // =====================
-  //  Features
-  // =====================
+  // Features
 
-  // --- 🌟 ميزة شؤون الطلاب (القسم الجديد والمُنظَّم) 🌟 ---
-  sl.registerFactory(() => StudentAffairsCubit(getStudentDashboardData: sl()));
-  // sl.registerFactory(() => affairs.AddStudentCubit(addStudentUseCase: sl()));
-  sl.registerLazySingleton(() => GetStudentDashboardData(sl()));
-  sl.registerLazySingleton(() => AddStudent(sl()));
+  // Student Affairs
+  // --- 🌟 Student Affairs Feature (Unified) 🌟 ---
+  // Cubits
+  sl.registerFactory(() => StudentAffairsCubit(studentAffairsRepository: sl()));
+  sl.registerFactory(
+    () => affairs.ManageStudentCubit(studentAffairsRepository: sl()),
+  );
+  sl.registerFactory(
+    () => StudentAffairsDashboardCubit(
+      studentAffairsRepository: sl(),
+      // appUserRepository: sl(),
+    ),
+  );
+
+  // Repository
   sl.registerLazySingleton<StudentAffairsRepository>(
     () =>
         StudentAffairsRepositoryImpl(remoteDataSource: sl(), networkInfo: sl()),
   );
+
+  // Data Source
   sl.registerLazySingleton<StudentAffairsRemoteDataSource>(
     () => StudentAffairsRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
-  // --- نهاية قسم شؤون الطلاب ---
+  // --- End of Student Affairs Feature ---
 
-  // -- Auth Feature --
+  // Auth
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
@@ -132,11 +139,10 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory<LoginCubit>(() => LoginCubit(authRepository: sl()));
   sl.registerFactory<RegisterCubit>(() => RegisterCubit(authRepository: sl()));
 
-  // -- Main Screen & Home Features --
+  // Main Screen & Home
   sl.registerFactory<MainScreenCubit>(() => MainScreenCubit());
-  // sl.registerFactory<HomeCubit>(() => HomeCubit(scheduleRepository: sl()));
 
-  // -- Schedule Feature --
+  // Schedule
   sl.registerLazySingleton<ScheduleRemoteDataSource>(
     () => ScheduleRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
@@ -148,20 +154,13 @@ Future<void> setupServiceLocator() async {
     () => ManageScheduleCubit(repository: sl()),
   );
   sl.registerFactory(
-    () => ScheduleFormDataCubit(
-      courseRepository: sl(),
-      teacherRepository: sl(),
-      // classroomRepository: sl(),
-    ),
+    () =>
+        ScheduleFormDataCubit(courseRepository: sl(), teacherRepository: sl()),
   );
 
-  // -- Announcement Feature --
+  // Announcement
   sl.registerLazySingleton<AnnouncementRemoteDataSource>(
-    () => AnnouncementRemoteDataSourceImpl(
-      dio: sl(),
-      secureStorage: sl(),
-      client: sl(),
-    ),
+    () => AnnouncementRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
   sl.registerLazySingleton<AnnouncementRepository>(
     () => AnnouncementRepositoryImpl(remoteDataSource: sl()),
@@ -173,19 +172,17 @@ Future<void> setupServiceLocator() async {
     () => ManageAnnouncementsCubit(repository: sl()),
   );
 
-  // -- Student Feature (القديم) --
-  sl.registerLazySingleton<StudentRemoteDataSource>(
-    () => StudentRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
-  );
-  sl.registerLazySingleton<StudentRepository>(
-    () => StudentRepositoryImpl(remoteDataSource: sl()),
-  );
-  sl.registerFactory<StudentCubit>(() => StudentCubit(studentRepository: sl()));
-  sl.registerFactory(() => affairs.AddStudentCubit(addStudentUseCase: sl()));
+  // Student
+  // sl.registerLazySingleton<StudentRemoteDataSource>(
+  //   () => StudentRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
+  // );
+  // sl.registerLazySingleton<StudentRepository>(
+  //   () => StudentRepositoryImpl(remoteDataSource: sl()),
+  // );
+  // sl.registerFactory<StudentCubit>(() => StudentCubit(studentRepository: sl()));
+  // sl.registerFactory(() => affairs.AddStudentCubit(addStudentUseCase: sl()));
 
-  // sl.registerFactory<ManageStudentCubit>(() => ManageStudentCubit(studentRepository: sl())); // <-- تم تعطيل هذا السطر المسبب للتعارض
-
-  // -- Teacher Feature --
+  // Teacher
   sl.registerLazySingleton<TeacherRemoteDataSource>(
     () => TeacherRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
@@ -196,23 +193,28 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory<ManageTeacherCubit>(
     () => ManageTeacherCubit(teacherRepository: sl()),
   );
+  sl.registerFactory<TeacherScheduleCubit>(
+    () =>
+        TeacherScheduleCubit(teacherRepository: sl(), scheduleRepository: sl()),
+  );
+  sl.registerFactory<TeacherCoursesCubit>(
+    () => TeacherCoursesCubit(scheduleRepository: sl(), courseRepository: sl()),
+  );
+  sl.registerFactory<TeacherProfileCubit>(
+    () => TeacherProfileCubit(teacherRepository: sl()),
+  );
 
-  // -- Course Feature --
-  //================== Course Feature ==================
-  // Cubit
+  // Course
   sl.registerFactory(() => CourseCubit(courseRepository: sl()));
-
-  // Repository
   sl.registerLazySingleton<CourseRepository>(
     () => CourseRepositoryImpl(remoteDataSource: sl()),
   );
-
-  // Data Sources
   sl.registerLazySingleton<CourseRemoteDataSource>(
     () => CourseRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
   sl.registerFactory(() => ManageCourseCubit(courseRepository: sl()));
-  // -- Classroom Feature --
+
+  // Classroom
   sl.registerLazySingleton<ClassroomRemoteDataSource>(
     () => ClassroomRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
@@ -226,24 +228,22 @@ Future<void> setupServiceLocator() async {
     () => ManageClassroomCubit(classroomRepository: sl()),
   );
 
-  //================== Exam Feature ==================
-  // Cubit
+  // Exam
   sl.registerFactory(() => ExamCubit(examRepository: sl()));
-  // Add this line
   sl.registerFactory(() => ManageExamCubit(examsRepository: sl()));
-
-  // Repository
   sl.registerLazySingleton<ExamRepository>(
     () => ExamRepositoryImpl(remoteDataSource: sl()),
   );
-
-  // Data Sources
   sl.registerLazySingleton<ExamRemoteDataSource>(
     () => ExamRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
   sl.registerFactory(() => GradeEntryCubit(examRepository: sl()));
+  sl.registerFactory(() => StudentExamResultsCubit(examsRepository: sl()));
+  sl.registerFactory(
+    () => ExamsDashboardCubit(examRepository: sl(), courseRepository: sl()),
+  );
 
-  // -- Exam Hall Assignment Feature --
+  // Exam Hall Assignment
   sl.registerLazySingleton<ExamHallAssignmentRemoteDataSource>(
     () =>
         ExamHallAssignmentRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
@@ -255,7 +255,8 @@ Future<void> setupServiceLocator() async {
     () => ExamHallAssignmentCubit(repository: sl()),
   );
   sl.registerFactory(() => ExamDistributionCubit(examRepository: sl()));
-  //================== Head Of Exams Feature ==================
+
+  // Head Of Exams
   sl.registerFactory(() => HeadOfExamsCubit(repository: sl()));
   sl.registerLazySingleton<HeadOfExamsRepository>(
     () => HeadOfExamsRepositoryImpl(remoteDataSource: sl()),
@@ -263,8 +264,14 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<HeadOfExamsRemoteDataSource>(
     () => HeadOfExamsRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
+  sl.registerFactory(
+    () => HeadOfExamsDashboardCubit(
+      headOfExamsRepository: sl(),
+      examRepository: sl(),
+    ),
+  );
 
-  // -- Users Feature --
+  // Users
   sl.registerLazySingleton<AppUserRemoteDataSource>(
     () => AppUserRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
@@ -273,21 +280,16 @@ Future<void> setupServiceLocator() async {
   );
   sl.registerFactory<AppUserCubit>(() => AppUserCubit(repository: sl()));
 
-  //================== Staff Feature ==================
-  // Cubit
-  // Cubit
+  // Staff
   sl.registerFactory(() => StaffCubit(staffRepository: sl()));
-  sl.registerFactory(
-    () => ManageStaffCubit(staffRepository: sl()),
-  ); // <-- أضف هذا السطر
-
-  // Repository
+  sl.registerFactory(() => ManageStaffCubit(staffRepository: sl()));
   sl.registerLazySingleton<StaffRepository>(
     () => StaffRepositoryImpl(remoteDataSource: sl()),
   );
-
-  // Data Sources
   sl.registerLazySingleton<StaffRemoteDataSource>(
     () => StaffRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
+  // personnel office
+  sl.registerFactory(() => PersonnelProfileCubit(staffRepository: sl()));
+  // lib/core/services/service_locator.dart
 }

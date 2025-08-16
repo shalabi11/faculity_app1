@@ -1,11 +1,12 @@
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
 import 'package:faculity_app2/features/teachers/domain/entities/teacher.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_cubit.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_state.dart';
-import 'package:faculity_app2/features/teachers/presentation/cubit/manage_teacher_cubit.dart';
-import 'package:faculity_app2/features/teachers/presentation/screens/add_edit_teacher_screen.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/manage_teacher/manage_teacher_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/screens/add_edit_teacher_screen/add_edit_teacher_screen.dart';
 
 class TeacherListScreen extends StatelessWidget {
   const TeacherListScreen({super.key});
@@ -46,7 +47,7 @@ class TeacherListScreen extends StatelessWidget {
           child: BlocBuilder<TeacherCubit, TeacherState>(
             builder: (context, state) {
               if (state is TeacherLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: LoadingList());
               } else if (state is TeacherSuccess) {
                 return _buildTeachersList(context, state.teachers);
               } else if (state is TeacherFailure) {

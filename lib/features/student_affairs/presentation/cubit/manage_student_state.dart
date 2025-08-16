@@ -1,21 +1,28 @@
+// lib/features/student_affairs/presentation/cubit/manage_student_state.dart
+
 part of 'manage_student_cubit.dart';
 
-abstract class AddStudentState extends Equatable {
-  const AddStudentState();
+abstract class ManageStudentState extends Equatable {
+  const ManageStudentState();
 
   @override
   List<Object> get props => [];
 }
 
-class AddStudentInitial extends AddStudentState {}
+class ManageStudentInitial extends ManageStudentState {}
 
-class AddStudentLoading extends AddStudentState {}
+class ManageStudentLoading extends ManageStudentState {}
 
-class AddStudentSuccess extends AddStudentState {}
-
-class AddStudentError extends AddStudentState {
+class ManageStudentSuccess extends ManageStudentState {
   final String message;
-  const AddStudentError({required this.message});
+  const ManageStudentSuccess(this.message);
+  @override
+  List<Object> get props => [message];
+}
+
+class ManageStudentFailure extends ManageStudentState {
+  final String message;
+  const ManageStudentFailure(this.message);
 
   @override
   List<Object> get props => [message];

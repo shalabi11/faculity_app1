@@ -1,3 +1,4 @@
+// lib/features/student_affairs/presentation/cubit/student_affairs_state.dart
 part of 'student_affairs_cubit.dart';
 
 abstract class StudentAffairsState extends Equatable {
@@ -12,15 +13,12 @@ class StudentAffairsInitial extends StudentAffairsState {}
 class StudentAffairsLoading extends StudentAffairsState {}
 
 class StudentAffairsLoaded extends StudentAffairsState {
-  // هذا هو الحقل الصحيح الذي يحتوي على بيانات لوحة التحكم
-  final StudentDashboardEntity dashboardData;
+  final List<Student> students;
 
-  // --- هذا هو التعريف الصحيح للـ constructor ---
-  // قمنا بحذف البارامتر الزائد والخاطئ (dashboardEntity)
-  const StudentAffairsLoaded({required this.dashboardData});
+  const StudentAffairsLoaded({required this.students});
 
   @override
-  List<Object> get props => [dashboardData];
+  List<Object> get props => [students];
 }
 
 class StudentAffairsError extends StudentAffairsState {

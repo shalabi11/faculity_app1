@@ -1,3 +1,4 @@
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
@@ -209,7 +210,7 @@ class _AddEditStaffViewState extends State<_AddEditStaffView> {
                 BlocBuilder<ManageStaffCubit, ManageStaffState>(
                   builder: (context, state) {
                     if (state is ManageStaffLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: LoadingList());
                     }
                     return ElevatedButton(
                       onPressed: _submitForm,

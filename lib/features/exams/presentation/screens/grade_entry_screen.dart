@@ -1,3 +1,4 @@
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam_result.dart';
 import 'package:flutter/material.dart';
@@ -83,11 +84,7 @@ class _GradeEntryViewState extends State<_GradeEntryView> {
               if (state is GradeSaving) {
                 return const Padding(
                   padding: EdgeInsets.all(12.0),
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
+                  child: SizedBox(width: 24, height: 24, child: LoadingList()),
                 );
               }
               return IconButton(
@@ -123,7 +120,7 @@ class _GradeEntryViewState extends State<_GradeEntryView> {
         },
         builder: (context, state) {
           if (state is GradeEntryLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: LoadingList());
           } else if (state is GradeEntryLoaded) {
             // تهيئة الـ controllers عند تحميل قائمة الطلاب
             _controllers.clear();

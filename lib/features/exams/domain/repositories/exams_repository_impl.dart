@@ -94,4 +94,16 @@ class ExamRepositoryImpl implements ExamRepository {
       return Left(ServerFailure(message: e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, List<ExamResultEntity>>> getStudentResults(
+    int studentId,
+  ) async {
+    try {
+      final results = await remoteDataSource.getStudentResults(studentId);
+      return Right(results);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    }
+  }
 }

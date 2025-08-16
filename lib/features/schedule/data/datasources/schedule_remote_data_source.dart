@@ -1,5 +1,3 @@
-// lib/features/schedule/data/datasources/schedule_remote_data_source.dart
-
 import 'package:dio/dio.dart';
 import 'package:faculity_app2/core/errors/exceptions.dart';
 import 'package:faculity_app2/core/utils/constant.dart';
@@ -31,17 +29,7 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
   }
-  // @override
-  // Future<List<ScheduleEntryModel>> getTheorySchedule(String year) async {
-  //   // ... (هذه الدالة تبقى كما هي)
-  // }
 
-  // @override
-  // Future<List<ScheduleEntryModel>> getLabSchedule(String group) async {
-  //   // ... (هذه الدالة تبقى كما هي)
-  // }
-
-  // --- تم تعديل معالجة الأخطاء هنا ---
   @override
   Future<void> addSchedule(Map<String, dynamic> scheduleData) async {
     try {
@@ -55,9 +43,9 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
         final errors = e.response?.data['errors'] as Map<String, dynamic>?;
         if (errors != null) {
           final errorMessages = errors.entries
-              .map((entry) {
-                return '${entry.key}: ${(entry.value as List).join(', ')}';
-              })
+              .map(
+                (entry) => '${entry.key}: ${(entry.value as List).join(', ')}',
+              )
               .join('\n');
           throw ServerException(message: 'خطأ في التحقق:\n$errorMessages');
         }
@@ -78,7 +66,6 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
     }
   }
 
-  // --- التصحيح هنا: إزالة الأقواس المعقوصة وكلمة required ---
   @override
   Future<List<ScheduleEntryModel>> getTheorySchedule(String year) async {
     try {
@@ -86,11 +73,23 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
         '${Constants.baseUrl}/api/schedules/theory/$year',
         options: await _getAuthHeaders(),
       );
-      final List<dynamic> data = response.data['data'] as List;
-      return data.map((json) => ScheduleEntryModel.fromJson(json)).toList();
+
+      // التعامل مع أكثر من صيغة للرد
+      final rawData = response.data;
+      List<dynamic> dataList;
+
+      if (rawData is List) {
+        dataList = rawData;
+      } else if (rawData is Map && rawData['data'] is List) {
+        dataList = rawData['data'];
+      } else {
+        throw ServerException(message: 'استجابة الخادم غير متوقعة.');
+      }
+
+      return dataList.map((json) => ScheduleEntryModel.fromJson(json)).toList();
     } on DioException catch (e) {
       handleDioException(e);
-      throw ServerException(message: 'Failed to load theory schedule.');
+      throw ServerException(message: 'فشل تحميل الجدول النظري.');
     }
   }
 
@@ -101,15 +100,26 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
   ) async {
     try {
       final response = await dio.get(
-        // Add the section to the API endpoint
         '${Constants.baseUrl}/api/schedules/lab/$group/$section',
         options: await _getAuthHeaders(),
       );
-      final List<dynamic> data = response.data['data'] as List;
-      return data.map((json) => ScheduleEntryModel.fromJson(json)).toList();
+
+      // التعامل مع أكثر من صيغة للرد
+      final rawData = response.data;
+      List<dynamic> dataList;
+
+      if (rawData is List) {
+        dataList = rawData;
+      } else if (rawData is Map && rawData['data'] is List) {
+        dataList = rawData['data'];
+      } else {
+        throw ServerException(message: 'استجابة الخادم غير متوقعة.');
+      }
+
+      return dataList.map((json) => ScheduleEntryModel.fromJson(json)).toList();
     } on DioException catch (e) {
       handleDioException(e);
-      throw ServerException(message: 'Failed to load lab schedule.');
+      throw ServerException(message: 'فشل تحميل الجدول العملي.');
     }
   }
 
@@ -125,16 +135,4 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
       handleDioException(e);
     }
   }
-
-  // @override
-  // Future<List<ScheduleEntryModel>> getLabSchedule(String group) {
-  //   // TODO: implement getLabSchedule
-  //   throw UnimplementedError();
-  // }
-
-  // @override
-  // Future<List<ScheduleEntryModel>> getTheorySchedule(String year) {
-  //   // TODO: implement getTheorySchedule
-  //   throw UnimplementedError();
-  // }
 }

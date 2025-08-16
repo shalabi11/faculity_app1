@@ -1,4 +1,5 @@
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/classrooms/domain/entities/classroom.dart';
 import 'package:faculity_app2/features/classrooms/presentation/cubit/classroom_cubit.dart';
 import 'package:faculity_app2/features/classrooms/presentation/cubit/classroom_state.dart';
@@ -84,13 +85,16 @@ class _ManageClassroomsView extends StatelessWidget {
         },
         child: BlocBuilder<ClassroomCubit, ClassroomState>(
           builder: (context, state) {
-            if (state is ClassroomLoading)
-              return const Center(child: CircularProgressIndicator());
-            if (state is ClassroomFailure)
+            if (state is ClassroomLoading) {
+              return const Center(child: LoadingList());
+            }
+            if (state is ClassroomFailure) {
               return Center(child: Text('حدث خطأ: ${state.message}'));
+            }
             if (state is ClassroomSuccess) {
-              if (state.classrooms.isEmpty)
+              if (state.classrooms.isEmpty) {
                 return const Center(child: Text('لا توجد قاعات لعرضها.'));
+              }
               return ListView.builder(
                 itemCount: state.classrooms.length,
                 itemBuilder: (context, index) {

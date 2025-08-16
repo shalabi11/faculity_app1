@@ -1,3 +1,4 @@
+import 'package:faculity_app2/features/schedule/data/models/schedule_entry_model.dart';
 import 'package:faculity_app2/features/teachers/domain/entities/teacher.dart';
 
 abstract class TeacherRepository {
@@ -8,4 +9,5 @@ abstract class TeacherRepository {
     required Map<String, dynamic> teacherData,
   });
   Future<void> deleteTeacher({required int id});
+  Future<List<ScheduleEntryModel>> getTeacherSchedule(int teacherId);
 }

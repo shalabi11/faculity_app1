@@ -1,6 +1,7 @@
 // lib/features/admin/presentation/screens/admin_profile_screen.dart
 
 import 'package:faculity_app2/core/theme/app_color.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_state.dart';
 import 'package:faculity_app2/features/auth/presentation/screens/login_screen.dart';
@@ -69,7 +70,7 @@ class AdminProfileScreen extends StatelessWidget {
                   builder: (context, state) {
                     if (state is AuthLoading) {
                       // في حالة التحميل، اعرض دائرة تحميل
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: LoadingList());
                     }
                     // في الحالة العادية، اعرض الزر
                     return _ActionsSection();

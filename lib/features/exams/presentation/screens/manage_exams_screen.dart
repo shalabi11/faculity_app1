@@ -1,9 +1,11 @@
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_state.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/manage_exam_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/screens/add_edit_exam_screen.dart';
+import 'package:faculity_app2/features/exams/presentation/screens/exam_result_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,7 +19,40 @@ class ManageExamsScreen extends StatelessWidget {
         BlocProvider(create: (context) => sl<ExamCubit>()..fetchExams()),
         BlocProvider(create: (context) => sl<ManageExamCubit>()),
       ],
-      child: const _ManageExamsView(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('إدارة الامتحانات'),
+          // ✨ --- تم إضافة هذا الزر --- ✨
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.grading_outlined),
+              tooltip: 'إدخال العلامات',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ExamSelectionForResultsScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        body: const _ManageExamsView(),
+        floatingActionButton: Builder(
+          builder:
+              (context) => FloatingActionButton(
+                onPressed: () async {
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => const AddEditExamScreen(),
+                    ),
+                  );
+                  if (result == true) context.read<ExamCubit>().fetchExams();
+                },
+                child: const Icon(Icons.add),
+              ),
+        ),
+      ),
     );
   }
 }
@@ -81,13 +116,15 @@ class _ManageExamsView extends StatelessWidget {
         child: BlocBuilder<ExamCubit, ExamState>(
           builder: (context, state) {
             if (state is ExamLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingList());
             }
-            if (state is ExamError)
+            if (state is ExamError) {
               return Center(child: Text('حدث خطأ: ${state.message}'));
+            }
             if (state is ExamLoaded) {
-              if (state.exams.isEmpty)
+              if (state.exams.isEmpty) {
                 return const Center(child: Text('لا توجد امتحانات لعرضها.'));
+              }
               return ListView.builder(
                 itemCount: state.exams.length,
                 itemBuilder: (context, index) {
@@ -132,6 +169,7 @@ class _ManageExamsView extends StatelessWidget {
           final result = await Navigator.of(context).push<bool>(
             MaterialPageRoute(builder: (_) => const AddEditExamScreen()),
           );
+          // ignore: use_build_context_synchronously
           if (result == true) context.read<ExamCubit>().fetchExams();
         },
         child: const Icon(Icons.add),

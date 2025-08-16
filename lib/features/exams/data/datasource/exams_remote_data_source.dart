@@ -18,6 +18,7 @@ abstract class ExamRemoteDataSource {
   Future<List<ExamResultModel>> getStudentsForExam(int examId);
   Future<void> saveGrades(List<Map<String, dynamic>> grades);
   Future<List<ExamDistributionResultModel>> distributeHalls(int examId);
+  Future<List<ExamResultModel>> getStudentResults(int studentId);
 }
 
 class ExamRemoteDataSourceImpl implements ExamRemoteDataSource {
@@ -25,6 +26,25 @@ class ExamRemoteDataSourceImpl implements ExamRemoteDataSource {
   final FlutterSecureStorage secureStorage;
 
   ExamRemoteDataSourceImpl({required this.dio, required this.secureStorage});
+  @override
+  Future<List<ExamResultModel>> getStudentResults(int studentId) async {
+    try {
+      final response = await dio.get(
+        '$baseUrl/api/exam-results/student/$studentId',
+        options: await _getAuthHeaders(),
+      );
+
+      if (response.statusCode == 200 && response.data is List) {
+        final List<dynamic> data = response.data;
+        return data.map((json) => ExamResultModel.fromJson(json)).toList();
+      } else {
+        throw ServerException(message: 'استجابة الخادم غير متوقعة');
+      }
+    } on DioException catch (e) {
+      handleDioException(e);
+      throw ServerException(message: "فشل جلب نتائج الطالب");
+    }
+  }
 
   @override
   Future<List<ExamModel>> getAllExams() async {

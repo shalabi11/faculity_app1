@@ -1,16 +1,22 @@
+// lib/features/auth/presentation/screens/login_screen.dart
+
 import 'package:faculity_app2/core/services/service_locator.dart';
 import 'package:faculity_app2/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:faculity_app2/features/auth/presentation/screens/register_screen.dart';
 import 'package:faculity_app2/features/auth/widgets/role_selector_widget.dart';
-import 'package:faculity_app2/features/exams/presentation/screens/manage_exams_screen.dart';
+import 'package:faculity_app2/features/exams/presentation/screens/exams_office_dashboard.dart';
 import 'package:faculity_app2/features/head_of_exams/presentation/screens/exams_for_publishing_screen.dart';
+import 'package:faculity_app2/features/head_of_exams/presentation/screens/head_of_exams_dashboard_screen.dart';
 import 'package:faculity_app2/features/main_screen/presentation/screens/student_main_screen.dart';
 import 'package:faculity_app2/features/personnel_office/presentation/screens/personnel_dashboard_screen.dart';
 import 'package:faculity_app2/features/staff/presentation/screens/staff_list_screen.dart';
 import 'package:faculity_app2/features/student_affairs/presentation/screens/student_affairs_dashboard_screen.dart';
-import 'package:faculity_app2/features/teachers/presentation/screens/teacher_list_screen.dart';
+import 'package:faculity_app2/features/teachers/presentation/screens/add_edit_teacher_screen/teacher_list_screen.dart';
+import 'package:faculity_app2/features/teachers/presentation/screens/screen_of_teacher/teacher_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../cubit/login_cubit.dart';
 import '../../domain/entities/user.dart';
 
@@ -33,35 +39,18 @@ class _LoginView extends StatefulWidget {
   State<_LoginView> createState() => _LoginViewState();
 }
 
-class _LoginViewState extends State<_LoginView>
-    with SingleTickerProviderStateMixin {
+class _LoginViewState extends State<_LoginView> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _extraFieldController = TextEditingController();
   String _selectedRole = 'student';
-  late AnimationController _animController;
-  late Animation<double> _fadeAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    )..repeat(reverse: true);
-    _fadeAnim = CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeInOut,
-    );
-  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     _extraFieldController.dispose();
-    _animController.dispose();
     super.dispose();
   }
 
@@ -76,21 +65,61 @@ class _LoginViewState extends State<_LoginView>
 
   void _login() {
     if (_formKey.currentState!.validate()) {
-      String apiRole = _selectedRole;
-      if (_selectedRole != 'student') {
-        apiRole = 'admin';
+      // ✨ --- تم التعديل الكامل هنا --- ✨
+      String apiRole;
+      if (_selectedRole == 'student') {
+        apiRole = 'student';
+      } else if (_selectedRole == 'teacher') {
+        apiRole = 'teacher'; // دور الدكتور يرسل كـ "teacher"
+      } else {
+        apiRole = 'admin'; // بقية الأدوار الإدارية ترسل كـ "admin"
       }
+
       final extraFieldConfig = _extraFieldConfig[_selectedRole];
       final Map<String, dynamic> data = {
         'role': apiRole,
         'email': _emailController.text.trim(),
         'password': _passwordController.text.trim(),
       };
+
       if (extraFieldConfig != null) {
         data[extraFieldConfig['name']] = _extraFieldController.text.trim();
       }
       context.read<LoginCubit>().login(data: data);
     }
+  }
+
+  void _navigateByRole(BuildContext context, String selectedRole, User user) {
+    Widget screen;
+    switch (selectedRole) {
+      case 'admin':
+        screen = AdminDashboardScreen(user: user);
+        break;
+      case 'teacher':
+        screen = TeacherMainScreen(user: user);
+        break;
+      case 'staff':
+        screen = const StaffListScreen();
+        break;
+      case 'studentAffairs':
+        screen = const StudentAffairsDashboardScreen();
+        break;
+      case 'personnel_office':
+        screen = const PersonnelDashboardScreen();
+        break;
+      case 'exams':
+        screen = const ExamsOfficeDashboardScreen();
+        break;
+      case 'head_of_exam':
+        screen = HeadOfExamsDashboardScreen(user: user);
+        break;
+      case 'student':
+      default:
+        screen = StudentMainScreen(user: user);
+    }
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => screen));
   }
 
   @override
@@ -117,7 +146,6 @@ class _LoginViewState extends State<_LoginView>
           child: Scaffold(
             body: Stack(
               children: [
-                // خلفية متدرجة
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -136,44 +164,8 @@ class _LoginViewState extends State<_LoginView>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 6),
-                        // لوجو مع ظل
-                        Hero(
-                          tag: 'app-logo-hero',
-                          child: Material(
-                            color: Colors.transparent,
-                            child: Container(
-                              width: 110,
-                              height: 110,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 12,
-                                  ),
-                                ],
-                              ),
-                              // يمكنك وضع صورة اللوجو هنا
-                              // child: Image.asset('path/to/your/logo.png'),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        FadeTransition(
-                          opacity: _fadeAnim,
-                          child: const Text(
-                            'مرحبا — سجّل دخولك',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                        const _WelcomeHeader(),
                         const SizedBox(height: 18),
-
-                        // الفورم داخل Card
                         Card(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -184,6 +176,7 @@ class _LoginViewState extends State<_LoginView>
                             child: Form(
                               key: _formKey,
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   RoleSelectorWidget(
                                     onRoleSelected: _onRoleChanged,
@@ -207,7 +200,6 @@ class _LoginViewState extends State<_LoginView>
                                       return null;
                                     },
                                   ),
-                                  // استخدام AnimatedSize لتوفير حركة عند ظهور الحقل الإضافي
                                   AnimatedSize(
                                     duration: const Duration(milliseconds: 300),
                                     curve: Curves.easeInOut,
@@ -256,38 +248,30 @@ class _LoginViewState extends State<_LoginView>
                                     },
                                   ),
                                   const SizedBox(height: 24),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 48,
-                                    child: ElevatedButton(
-                                      onPressed: isLoading ? null : _login,
-                                      style: ElevatedButton.styleFrom(
-                                        shape: const StadiumBorder(),
-                                      ),
-                                      child:
-                                          isLoading
-                                              ? const SizedBox(
-                                                width: 22,
-                                                height: 22,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation(
-                                                        Colors.white,
-                                                      ),
-                                                ),
-                                              )
-                                              : const Text(
-                                                'تسجيل الدخول',
-                                                style: TextStyle(fontSize: 16),
+                                  ElevatedButton(
+                                    onPressed: isLoading ? null : _login,
+                                    child:
+                                        isLoading
+                                            ? const SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 3,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation(
+                                                      Colors.white,
+                                                    ),
                                               ),
-                                    ),
+                                            )
+                                            : const Text('تسجيل الدخول'),
                                   ),
+                                  const SizedBox(height: 8),
+                                  _buildSignUpPrompt(context),
                                 ],
                               ),
                             ),
                           ),
-                        ),
+                        ).animate().fade(duration: 500.ms).slideY(begin: 0.5),
                       ],
                     ),
                   ),
@@ -300,55 +284,63 @@ class _LoginViewState extends State<_LoginView>
     );
   }
 
-  void _navigateByRole(BuildContext context, String selectedRole, User user) {
-    switch (selectedRole) {
-      case 'admin':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => AdminDashboardScreen(user: user)),
-        );
-        break;
-      case 'student':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => StudentMainScreen(user: user)),
-        );
-        break;
-      case 'teacher':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const TeacherListScreen()),
-        );
-        break;
-      case 'staff':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const StaffListScreen()),
-        );
-        break;
-      case 'studentAffairs':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => const StudentAffairsDashboardScreen(),
+  Widget _buildSignUpPrompt(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('ليس لديك حساب؟'),
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const RegisterScreen()),
+            );
+          },
+          child: const Text('أنشئ حساباً'),
+        ),
+      ],
+    );
+  }
+}
+
+class _WelcomeHeader extends StatelessWidget {
+  const _WelcomeHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Hero(
+          tag: 'app-logo-hero',
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 110,
+              height: 110,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12)],
+              ),
+            ),
           ),
-        );
-        break;
-      case 'personnel_office':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const PersonnelDashboardScreen()),
-        );
-        break;
-      case 'exams':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const ManageExamsScreen()),
-        );
-        break;
-      case 'head_of_exam':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const ExamsForPublishingScreen()),
-        );
-        break;
-      default:
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => StudentMainScreen(user: user)),
-        );
-    }
+        ).animate().fade(duration: 400.ms).scale(begin: const Offset(0.8, 0.8)),
+        const SizedBox(height: 16),
+        const Text(
+              'مرحباً بعودتك!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            )
+            .animate()
+            .fade(delay: 200.ms, duration: 500.ms)
+            .slideY(begin: -0.5, curve: Curves.easeOut),
+        const SizedBox(height: 4),
+        const Text(
+          'سجل الدخول للمتابعة',
+          style: TextStyle(color: Colors.black54),
+        ).animate().fade(delay: 400.ms, duration: 500.ms),
+      ],
+    );
   }
 }
 

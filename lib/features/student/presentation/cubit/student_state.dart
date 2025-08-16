@@ -1,21 +1,21 @@
-// lib/features/student/presentation/cubit/student_state.dart
+// // lib/features/student/presentation/cubit/student_state.dart
 
-part of 'student_cubit.dart';
+// part of 'student_cubit.dart';
 
-abstract class StudentState {}
+// abstract class StudentState {}
 
-class StudentInitial extends StudentState {}
+// class StudentInitial extends StudentState {}
 
-class StudentLoading extends StudentState {
-  get students => null;
-}
+// class StudentLoading extends StudentState {
+//   get students => null;
+// }
 
-class StudentSuccess extends StudentState {
-  final List<Student> students;
-  StudentSuccess(this.students);
-}
+// class StudentSuccess extends StudentState {
+//   final List<Student> students;
+//   StudentSuccess(this.students);
+// }
 
-class StudentFailure extends StudentState {
-  final String message;
-  StudentFailure(this.message);
-}
+// class StudentFailure extends StudentState {
+//   final String message;
+//   StudentFailure(this.message);
+// }

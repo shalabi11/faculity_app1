@@ -1,13 +1,22 @@
+// lib/features/auth/presentation/screens/register_screen.dart
+
+import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:faculity_app2/features/auth/widgets/role_selector_widget.dart';
+import 'package:faculity_app2/features/exams/presentation/screens/exams_office_dashboard.dart';
+import 'package:faculity_app2/features/head_of_exams/presentation/screens/exams_for_publishing_screen.dart';
+import 'package:faculity_app2/features/main_screen/presentation/screens/student_main_screen.dart';
+import 'package:faculity_app2/features/personnel_office/presentation/screens/personnel_dashboard_screen.dart';
+import 'package:faculity_app2/features/staff/presentation/screens/staff_list_screen.dart';
+import 'package:faculity_app2/features/student_affairs/presentation/screens/student_affairs_dashboard_screen.dart';
+import 'package:faculity_app2/features/teachers/presentation/screens/add_edit_teacher_screen/teacher_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import '../../domain/entities/user.dart';
 import '../cubit/register_cubit.dart';
 
-// ======================================================================
-//  1. تعريف الحقول الكاملة لكل دور
-// ======================================================================
 const Map<String, List<Map<String, dynamic>>> _registerFieldsConfig = {
   'student': [
     {'name': 'name', 'label': 'الاسم الكامل', 'icon': Icons.person_outline},
@@ -126,14 +135,26 @@ const Map<String, List<Map<String, dynamic>>> _registerFieldsConfig = {
   ],
 };
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => sl<RegisterCubit>(),
+      child: const _RegisterView(),
+    );
+  }
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterView extends StatefulWidget {
+  const _RegisterView();
+
+  @override
+  State<_RegisterView> createState() => _RegisterViewState();
+}
+
+class _RegisterViewState extends State<_RegisterView> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
   String _selectedRole = 'student';
@@ -179,19 +200,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  void _navigateByRole(BuildContext context, String targetRole, User user) {
+    Widget screen;
+    switch (targetRole) {
+      case 'admin':
+        screen = AdminDashboardScreen(user: user);
+        break;
+      case 'teacher':
+        screen = const TeacherListScreen();
+        break;
+      case 'staff':
+        screen = const StaffListScreen();
+        break;
+      case 'studentAffairs':
+        screen = const StudentAffairsDashboardScreen();
+        break;
+      case 'personnel_office':
+        screen = const PersonnelDashboardScreen();
+        break;
+      case 'exams':
+        screen = const ExamsOfficeDashboardScreen();
+        break;
+      case 'head_of_exam':
+        screen = const ExamsForPublishingScreen();
+        break;
+      case 'student':
+      default:
+        screen = StudentMainScreen(user: user);
+    }
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => screen),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentFields = _registerFieldsConfig[_selectedRole] ?? [];
+    final primary = Theme.of(context).primaryColor;
+
     return BlocConsumer<RegisterCubit, RegisterState>(
       listener: (context, state) {
         if (state is RegisterSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.successMessage),
+            const SnackBar(
+              content: Text('تم إنشاء الحساب وتسجيل الدخول بنجاح!'),
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.of(context).pop();
+          _navigateByRole(context, state.target, state.user);
         } else if (state is RegisterFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -203,127 +260,119 @@ class _RegisterScreenState extends State<RegisterScreen> {
       },
       builder: (context, state) {
         final isLoading = state is RegisterLoading;
-        return Scaffold(
-          body: AbsorbPointer(
-            absorbing: isLoading,
-            child: SafeArea(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Colors.cyan.shade200, Colors.blue.shade500],
-                  ),
-                ),
-                child: Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const _RegisterHeader(),
-                        const SizedBox(height: 40),
-                        Container(
-                          padding: const EdgeInsets.all(24.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                RoleSelectorWidget(
-                                  onRoleSelected: _onRoleChanged,
-                                ),
-                                const SizedBox(height: 20),
-                                ...currentFields
-                                    .map((field) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 16.0,
-                                        ),
-                                        child: TextFormField(
-                                          controller:
-                                              _controllers[field['name']],
-                                          obscureText:
-                                              field['isPassword'] ?? false,
-                                          keyboardType:
-                                              field['keyboardType'] ??
-                                              TextInputType.text,
-                                          decoration: InputDecoration(
-                                            hintText: field['label'],
-                                            prefixIcon: Icon(field['icon']),
-                                          ),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'الرجاء إدخال ${field['label']}';
-                                            }
-                                            if (field['name'] ==
-                                                'password_confirmation') {
-                                              if (value !=
-                                                  _controllers['password']
-                                                      ?.text) {
-                                                return 'كلمتا المرور غير متطابقتين';
-                                              }
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      );
-                                    })
-                                    .toList()
-                                    .animate(interval: 50.ms)
-                                    .fade(duration: 200.ms)
-                                    .slideX(begin: 0.1),
-                                const SizedBox(height: 8),
-                                ElevatedButton(
-                                  onPressed: isLoading ? null : _register,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    textStyle: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Cairo',
-                                    ),
-                                  ),
-                                  child:
-                                      isLoading
-                                          ? const SizedBox(
-                                            height: 24,
-                                            width: 24,
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 3,
-                                            ),
-                                          )
-                                          : const Text('إنشاء الحساب'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        const _LoginPrompt(),
-                      ],
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            body: AbsorbPointer(
+              absorbing: isLoading,
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [primary.withOpacity(0.9), Colors.white],
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                      ),
                     ),
                   ),
-                ),
+                  SafeArea(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 28,
+                      ),
+                      child: Column(
+                        children: [
+                          const _RegisterHeader(),
+                          const SizedBox(height: 18),
+                          Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 6,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    RoleSelectorWidget(
+                                      onRoleSelected: _onRoleChanged,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    ...currentFields
+                                        .map(
+                                          (field) => Padding(
+                                            padding: const EdgeInsets.only(
+                                              bottom: 12.0,
+                                            ),
+                                            child: TextFormField(
+                                              controller:
+                                                  _controllers[field['name']],
+                                              obscureText:
+                                                  field['isPassword'] ?? false,
+                                              keyboardType:
+                                                  field['keyboardType'] ??
+                                                  TextInputType.text,
+                                              decoration: InputDecoration(
+                                                labelText: field['label'],
+                                                prefixIcon: Icon(field['icon']),
+                                              ),
+                                              validator: (value) {
+                                                if (value == null ||
+                                                    value.isEmpty) {
+                                                  return 'الرجاء إدخال ${field['label']}';
+                                                }
+                                                if (field['name'] ==
+                                                    'password_confirmation') {
+                                                  if (value !=
+                                                      _controllers['password']
+                                                          ?.text) {
+                                                    return 'كلمتا المرور غير متطابقتين';
+                                                  }
+                                                }
+                                                return null;
+                                              },
+                                            ),
+                                          ),
+                                        )
+                                        .toList()
+                                        .animate(interval: 50.ms)
+                                        .fade(duration: 200.ms)
+                                        .slideX(begin: -0.1),
+                                    const SizedBox(height: 14),
+                                    ElevatedButton(
+                                      onPressed: isLoading ? null : _register,
+                                      child:
+                                          isLoading
+                                              ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 3,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation(
+                                                        Colors.white,
+                                                      ),
+                                                ),
+                                              )
+                                              : const Text('إنشاء الحساب'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ).animate().fade(duration: 500.ms).slideY(begin: 0.5),
+                          const SizedBox(height: 16),
+                          const _LoginPrompt(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -335,48 +384,72 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 class _RegisterHeader extends StatelessWidget {
   const _RegisterHeader();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Icon(
-          Icons.person_add_alt_1_outlined,
-          size: 80,
-          color: Colors.white,
-        ),
+        Hero(
+          tag: 'app-logo-hero',
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 110,
+              height: 110,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12)],
+              ),
+              child: Icon(
+                Icons.person_add_alt_1,
+                size: 60,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+        ).animate().fade(duration: 400.ms).scale(begin: const Offset(0.8, 0.8)),
         const SizedBox(height: 16),
         const Text(
-          'إنشاء حساب جديد',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+              'إنشاء حساب جديد',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            )
+            .animate()
+            .fade(delay: 200.ms, duration: 500.ms)
+            .slideY(begin: -0.5, curve: Curves.easeOut),
+        const SizedBox(height: 4),
+        const Text(
+          'املأ الحقول التالية للمتابعة',
+          style: TextStyle(color: Colors.black54),
+        ).animate().fade(delay: 400.ms, duration: 500.ms),
       ],
-    ).animate().fade(duration: 400.ms);
+    );
   }
 }
 
 class _LoginPrompt extends StatelessWidget {
   const _LoginPrompt();
+
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
+        Text(
           'لديك حساب بالفعل؟',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Colors.grey.shade800),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'سجل الدخول',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
-    );
+    ).animate().fade(delay: 700.ms);
   }
 }

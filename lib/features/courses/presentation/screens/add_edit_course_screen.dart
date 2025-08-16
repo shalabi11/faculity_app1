@@ -1,4 +1,9 @@
+// lib/features/courses/presentation/screens/add_edit_course_screen.dart
+
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
+// ✨ 1. استيراد الويدجت الجديد
+import 'package:faculity_app2/core/widget/year_dropdown_form_field.dart';
 import 'package:faculity_app2/features/courses/domain/entities/course_entity.dart';
 import 'package:faculity_app2/features/courses/presentation/cubit/manage_course_cubit.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +34,7 @@ class _AddEditCourseViewState extends State<_AddEditCourseView> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _departmentController;
-  late TextEditingController _yearController;
+  String? _selectedYear;
 
   bool get _isEditMode => widget.course != null;
 
@@ -40,14 +45,15 @@ class _AddEditCourseViewState extends State<_AddEditCourseView> {
     _departmentController = TextEditingController(
       text: widget.course?.department ?? '',
     );
-    _yearController = TextEditingController(text: widget.course?.year ?? '');
+    if (_isEditMode) {
+      _selectedYear = widget.course!.year;
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _departmentController.dispose();
-    _yearController.dispose();
     super.dispose();
   }
 
@@ -56,7 +62,7 @@ class _AddEditCourseViewState extends State<_AddEditCourseView> {
       final courseData = {
         'name': _nameController.text,
         'department': _departmentController.text,
-        'year': _yearController.text,
+        'year': _selectedYear,
       };
 
       if (_isEditMode) {
@@ -106,16 +112,22 @@ class _AddEditCourseViewState extends State<_AddEditCourseView> {
                 validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _yearController,
-                decoration: const InputDecoration(labelText: 'السنة'),
-                validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
+
+              // ✨ --- 2. استدعاء الويدجت الجديد هنا --- ✨
+              YearDropdownFormField(
+                selectedYear: _selectedYear,
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedYear = newValue;
+                  });
+                },
               ),
               const SizedBox(height: 24),
               BlocBuilder<ManageCourseCubit, ManageCourseState>(
                 builder: (context, state) {
-                  if (state is ManageCourseLoading)
+                  if (state is ManageCourseLoading) {
                     return const Center(child: CircularProgressIndicator());
+                  }
                   return ElevatedButton(
                     onPressed: _submitForm,
                     child: Text(_isEditMode ? 'حفظ التعديلات' : 'حفظ المادة'),

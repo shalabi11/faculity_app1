@@ -1,6 +1,7 @@
 //==============================================================================
 // 2. ويدجت الفورم (حقول الإدخال والزر)
 //==============================================================================
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/auth/widgets/role_selector_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -99,10 +100,7 @@ class LoginForm extends StatelessWidget {
                           ? const SizedBox(
                             height: 24,
                             width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 3,
-                            ),
+                            child: LoadingList(),
                           )
                           : const Text('تسجيل الدخول'),
                 ),

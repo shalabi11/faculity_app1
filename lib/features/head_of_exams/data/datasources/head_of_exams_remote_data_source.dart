@@ -1,3 +1,5 @@
+// lib/features/head_of_exams/data/datasources/head_of_exams_remote_data_source.dart
+
 import 'package:dio/dio.dart';
 import 'package:faculity_app2/core/utils/constant.dart';
 import 'package:faculity_app2/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -29,15 +31,17 @@ class HeadOfExamsRemoteDataSourceImpl implements HeadOfExamsRemoteDataSource {
   @override
   Future<List<ExamModel>> getPublishableExams() async {
     try {
+      // ✨ --- 1. تم تعديل هذا الجزء بالكامل --- ✨
       // نفترض أن هذا المسار يجلب الامتحانات التي تم إدخال علاماتها
       final response = await dio.get(
-        '$baseUrl/api/exams/publishable',
+        '$baseUrl/api/exams',
         options: await _getAuthHeaders(),
       );
-      if (response.statusCode == 200 && response.data['data'] is List) {
-        return (response.data['data'] as List)
-            .map((json) => ExamModel.fromJson(json))
-            .toList();
+
+      // نتعامل مع الرد الآن على أنه قائمة مباشرة
+      if (response.statusCode == 200 && response.data is List) {
+        final List<dynamic> data = response.data;
+        return data.map((json) => ExamModel.fromJson(json)).toList();
       } else {
         throw ServerException(message: 'استجابة الخادم غير متوقعة');
       }

@@ -1,3 +1,5 @@
+// lib/features/auth/data/datasources/auth_remote_data_source.dart
+
 import 'package:dio/dio.dart';
 import 'package:faculity_app2/core/errors/exceptions.dart';
 import 'package:faculity_app2/core/utils/constant.dart';
@@ -34,9 +36,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw ServerException(message: 'خطأ غير متوقع');
       }
     } on DioException catch (e) {
-      // تم تعديل هذه الدالة لتكون أكثر دقة
       handleDioException(e);
-      // هذا السطر لن يتم الوصول إليه غالبًا لأن الدالة السابقة سترمي الخطأ
       throw ServerException(message: 'خطأ في الشبكة');
     }
   }
@@ -56,9 +56,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       await secureStorage.delete(key: 'auth_token');
     } on DioException catch (e) {
-      await secureStorage.delete(
-        key: 'auth_token',
-      ); // حذف التوكن حتى لو فشل الطلب
+      await secureStorage.delete(key: 'auth_token');
       handleDioException(e);
     }
   }
@@ -93,31 +91,32 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 }
 
-// --- ✨ دالة معالجة الأخطاء بعد التعديل ✨ ---
+// --- ✨ دالة معالجة الأخطاء بعد التعديل النهائي ✨ ---
 void handleDioException(DioException e) {
-  // التحقق من أخطاء الاتصال والشهادات أولاً
   if (e.type == DioExceptionType.connectionError ||
       e.type == DioExceptionType.unknown ||
       e.type == DioExceptionType.badCertificate) {
-    // التحقق إذا كان السبب هو مشكلة في شهادة SSL
     if (e.message != null && e.message!.contains('HandshakeException')) {
       throw ServerException(
         message:
             'خطأ في شهادة الأمان (SSL). تأكد من أن الخادم لديه شهادة صالحة.',
       );
     }
-    // إذا لم يكن خطأ شهادة، فهو على الأغلب مشكلة في الاتصال
     throw ServerException(message: 'لا يوجد اتصال بالإنترنت أو الخادم متوقف.');
   }
 
-  // معالجة باقي أنواع الأخطاء كما كانت
   switch (e.type) {
     case DioExceptionType.badResponse:
+      // ✨ --- تم إضافة الحالة 409 هنا --- ✨
+      if (e.response?.statusCode == 409) {
+        // الخادم يرسل رسالة الخطأ مباشرة في 'message'
+        final message = e.response?.data['message'] ?? 'بيانات مكررة.';
+        throw ServerException(message: message);
+      }
       switch (e.response?.statusCode) {
         case 401:
           throw ServerException(message: 'بيانات الدخول غير صحيحة.');
         case 422:
-          // محاولة قراءة رسائل الخطأ من الخادم
           final errors = e.response?.data['errors'] as Map<String, dynamic>?;
           if (errors != null && errors.isNotEmpty) {
             throw ServerException(message: errors.values.first[0]);
@@ -139,7 +138,6 @@ void handleDioException(DioException e) {
         message: 'انتهت مهلة الاتصال، يرجى التحقق من شبكة الإنترنت.',
       );
     default:
-      // للحالات الأخرى مثل `cancel`
       throw ServerException(message: 'تم إلغاء الطلب.');
   }
 }

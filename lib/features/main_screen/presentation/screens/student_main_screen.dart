@@ -1,35 +1,76 @@
 // lib/features/main_screen/presentation/screens/student_main_screen.dart
 
+import 'package:faculity_app2/core/services/service_locator.dart';
 import 'package:faculity_app2/core/theme/app_color.dart';
 import 'package:faculity_app2/features/auth/domain/entities/user.dart';
+import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_cubit.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_cubit.dart';
+import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-// استيراد الشاشات مع الحفاظ على أسمائها الأصلية
+// استيراد الشاشات
 import 'home_screen.dart';
 import 'schedule_screen.dart';
 import 'exams_screen.dart';
 import 'profile_screen.dart';
 
-// تم تحويل الويدجت إلى StatefulWidget لإدارة حالته الداخلية (الصفحة المختارة)
-// هذا التغيير ضروري لتحقيق التنقل السلس دون التأثير على منطق الكود في أي مكان آخر
-class StudentMainScreen extends StatefulWidget {
+class StudentMainScreen extends StatelessWidget {
   final User user;
   const StudentMainScreen({super.key, required this.user});
 
   @override
-  State<StudentMainScreen> createState() => _StudentMainScreenState();
+  Widget build(BuildContext context) {
+    // ✨ --- تم التعديل الكامل هنا --- ✨
+    // تم نقل MultiBlocProvider ليغلف الشاشة بأكملها
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create:
+              (context) =>
+                  sl<ScheduleCubit>()..fetchStudentWeeklySchedule(
+                    year: user.year,
+                    section: user.section,
+                  ),
+        ),
+        BlocProvider(
+          create:
+              (context) =>
+                  sl<ScheduleCubit>()
+                    ..fetchTheorySchedule(year: user.year ?? ''),
+        ),
+        BlocProvider(
+          create:
+              (context) =>
+                  sl<StudentExamResultsCubit>()
+                    ..fetchStudentResults(studentId: user.id),
+        ),
+        BlocProvider(
+          create: (context) => sl<AnnouncementCubit>()..fetchAnnouncements(),
+        ),
+        BlocProvider(create: (context) => sl<ExamCubit>()..fetchExams()),
+      ],
+      child: _StudentMainScreenView(user: user),
+    );
+  }
 }
 
-class _StudentMainScreenState extends State<StudentMainScreen> {
-  // Controller للتحكم في الصفحات
+class _StudentMainScreenView extends StatefulWidget {
+  final User user;
+  const _StudentMainScreenView({required this.user});
+
+  @override
+  State<_StudentMainScreenView> createState() => _StudentMainScreenViewState();
+}
+
+class _StudentMainScreenViewState extends State<_StudentMainScreenView> {
   final PageController _pageController = PageController();
   int _selectedIndex = 0;
 
-  // قائمة الشاشات بنفس أسمائها
   late final List<Widget> _screens;
 
-  // قائمة العناوين
   final List<String> _appBarTitles = const [
     'الرئيسية',
     'الجدول الدراسي',
@@ -40,9 +81,8 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
   @override
   void initState() {
     super.initState();
-    // بناء قائمة الشاشات وتمرير بيانات المستخدم
     _screens = [
-      // HomeScreen(user: widget.user),
+      HomeScreen(user: widget.user),
       ScheduleScreen(user: widget.user),
       ExamsScreen(user: widget.user),
       ProfileScreen(user: widget.user),
@@ -55,7 +95,6 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
     super.dispose();
   }
 
-  // دالة لتغيير الصفحة عند الضغط على شريط التنقل
   void _onTabTapped(int index) {
     _pageController.animateToPage(
       index,
@@ -71,9 +110,7 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
         title: Text(_appBarTitles[_selectedIndex]),
         actions: [
           IconButton(
-            onPressed: () {
-              // يمكنك إضافة وظيفة هنا لاحقاً
-            },
+            onPressed: () {},
             icon: const Icon(Icons.notifications_none_rounded),
           ).animate().fade().slideX(),
         ],

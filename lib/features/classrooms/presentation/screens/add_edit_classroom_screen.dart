@@ -1,4 +1,5 @@
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/classrooms/domain/entities/classroom.dart';
 import 'package:faculity_app2/features/classrooms/presentation/cubit/manage_classroom_cubit.dart';
 import 'package:flutter/material.dart';
@@ -113,7 +114,7 @@ class _AddEditClassroomViewState extends State<_AddEditClassroomView> {
               BlocBuilder<ManageClassroomCubit, ManageClassroomState>(
                 builder: (context, state) {
                   if (state is ManageClassroomLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingList());
                   }
                   return ElevatedButton(
                     onPressed: _submitForm,

@@ -1,3 +1,4 @@
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,7 +46,7 @@ class ExamListScreen extends StatelessWidget {
           child: BlocBuilder<ExamCubit, ExamState>(
             builder: (context, state) {
               if (state is ExamLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: LoadingList());
               } else if (state is ExamLoaded) {
                 return _buildExamList(context, state.exams);
               } else if (state is ExamError) {

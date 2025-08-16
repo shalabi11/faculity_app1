@@ -21,4 +21,7 @@ abstract class ExamRepository {
   Future<Either<Failure, List<ExamDistributionResultEntity>>> distributeHalls(
     int examId,
   );
+  Future<Either<Failure, List<ExamResultEntity>>> getStudentResults(
+    int studentId,
+  ); // ✨ تم إضافة هذه الدالة
 }

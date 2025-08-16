@@ -10,14 +10,12 @@ class ExamHallAssignmentModel extends ExamHallAssignment {
   });
 
   factory ExamHallAssignmentModel.fromJson(Map<String, dynamic> json) {
-    // نفترض أن الخادم سيرجع كائنات متداخلة للطالب والقاعة
-    final studentData = json['student'] as Map<String, dynamic>? ?? {};
-    final classroomData = json['classroom'] as Map<String, dynamic>? ?? {};
-
+    // ✨ ---  تم تعديل هذا الجزء بالكامل --- ✨
+    // الآن نقوم بقراءة البيانات مباشرة من الكائن الرئيسي
     return ExamHallAssignmentModel(
-      studentName: studentData['full_name'] ?? 'طالب غير معروف',
-      universityId: studentData['university_id'] ?? 'رقم غير معروف',
-      classroomName: classroomData['name'] ?? 'قاعة غير معروفة',
+      studentName: json['student_name'] ?? 'طالب غير معروف',
+      universityId: json['university_id'] ?? 'رقم غير معروف',
+      classroomName: json['classroom_name'] ?? 'قاعة غير معروفة',
     );
   }
 }

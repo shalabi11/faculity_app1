@@ -1,3 +1,4 @@
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam_distribution_result_entity.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class ExamDistributionScreen extends StatelessWidget {
         body: BlocBuilder<ExamCubit, ExamState>(
           builder: (context, state) {
             if (state is ExamLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingList());
             } else if (state is ExamLoaded) {
               return _buildExamsList(context, state.exams);
             } else if (state is ExamError) {
@@ -75,7 +76,7 @@ class ExamDistributionScreen extends StatelessWidget {
                 BlocBuilder<ExamDistributionCubit, ExamDistributionState>(
                   builder: (context, distState) {
                     if (distState is ExamDistributionLoading) {
-                      return const CircularProgressIndicator();
+                      return const LoadingList();
                     }
                     return ElevatedButton(
                       onPressed: () {

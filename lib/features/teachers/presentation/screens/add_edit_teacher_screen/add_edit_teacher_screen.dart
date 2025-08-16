@@ -1,6 +1,7 @@
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/teachers/domain/entities/teacher.dart';
-import 'package:faculity_app2/features/teachers/presentation/cubit/manage_teacher_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/manage_teacher/manage_teacher_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -216,7 +217,7 @@ class _AddEditTeacherViewState extends State<_AddEditTeacherView> {
               BlocBuilder<ManageTeacherCubit, ManageTeacherState>(
                 builder: (context, state) {
                   if (state is ManageTeacherLoading)
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingList());
                   return ElevatedButton(
                     onPressed: _submitForm,
                     child: Text(_isEditMode ? 'حفظ التعديلات' : 'حفظ المدرس'),

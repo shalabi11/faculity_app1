@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/schedule/domain/entities/schedule_entry.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/manage_schedule_cubit.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/manage_schedule_state.dart';
@@ -118,10 +121,15 @@ class _AddEditScheduleViewState extends State<_AddEditScheduleView> {
       body: BlocBuilder<ScheduleFormDataCubit, ScheduleFormDataState>(
         builder: (context, state) {
           if (state is ScheduleFormDataLoading) {
-            return const Center(child: CircularProgressIndicator());
+            log('loading');
+            return const Center(child: LoadingList());
           } else if (state is ScheduleFormDataFailure) {
+            log('failure');
+
             return Center(child: Text(state.message));
           } else if (state is ScheduleFormDataLoaded) {
+            log('succes');
+
             // عند نجاح جلب البيانات، قم ببناء النموذج
             return _buildForm(context, state);
           }
@@ -239,7 +247,7 @@ class _AddEditScheduleViewState extends State<_AddEditScheduleView> {
               BlocBuilder<ManageScheduleCubit, ManageScheduleState>(
                 builder: (context, state) {
                   if (state is ManageScheduleLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingList());
                   }
                   return ElevatedButton(
                     style: ElevatedButton.styleFrom(

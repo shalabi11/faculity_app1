@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-// هذا هو الويدجت الرئيسي لتأثير Shimmer
 class ShimmerLoading extends StatelessWidget {
   final Widget child;
 
@@ -19,8 +18,6 @@ class ShimmerLoading extends StatelessWidget {
   }
 }
 
-// --- الويدجت المساعد الجديد ---
-// سنستخدمه لبناء الصناديق الرمادية في واجهة التحميل
 class ShimmerContainer extends StatelessWidget {
   final double? width;
   final double? height;

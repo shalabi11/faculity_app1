@@ -28,7 +28,6 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
   AnnouncementRemoteDataSourceImpl({
     required this.dio,
     required this.secureStorage,
-    required Object client,
   });
 
   Future<Options> _getAuthHeaders() async {
@@ -45,15 +44,8 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
   Future<List<AnnouncementModel>> getAnnouncements() async {
     try {
       final response = await dio.get('$baseUrl/api/announcements');
-
-      // يمكنك حذف سطر الطباعة الآن إذا أردت
-      // print('RAW ANNOUNCEMENTS RESPONSE: ${response.data}');
-
       if (response.statusCode == 200) {
-        // ======================= التعديل النهائي هنا =======================
-        // نقرأ من response.data مباشرة لأنها هي القائمة
         final List<dynamic> data = response.data;
-        // ===================================================================
         return data.map((json) => AnnouncementModel.fromJson(json)).toList();
       } else {
         throw ServerException(message: 'Failed to load announcements');
