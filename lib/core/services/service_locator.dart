@@ -37,6 +37,7 @@ import 'package:faculity_app2/features/exams/presentation/cubit/exams_dashboard_
 import 'package:faculity_app2/features/exams/presentation/cubit/grade_entry_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/manage_exam_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_cubit.dart';
+import 'package:faculity_app2/features/head_of_department/presentation/cubit/head_of_department_dashboard_cubit.dart';
 import 'package:faculity_app2/features/head_of_exams/data/datasources/head_of_exams_remote_data_source.dart';
 import 'package:faculity_app2/features/head_of_exams/domain/repository/head_of_exams_repository.dart';
 import 'package:faculity_app2/features/head_of_exams/domain/repository/head_of_exams_repository_impl.dart';
@@ -128,6 +129,15 @@ Future<void> setupServiceLocator() async {
     () => StudentAffairsRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
   // --- End of Student Affairs Feature ---
+
+  // Head of Department
+  sl.registerFactory(
+    () => HeadOfDepartmentDashboardCubit(
+      teacherRepository: sl(),
+      courseRepository: sl(),
+    ),
+  );
+
   // Admin
   sl.registerFactory(
     () => AdminDashboardCubit(

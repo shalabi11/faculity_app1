@@ -14,7 +14,11 @@ class _RoleSelectorWidgetState extends State<RoleSelectorWidget> {
   final List<Map<String, dynamic>> _roles = [
     {'name': 'طالب', 'value': 'student', 'icon': Icons.person_outline},
     {'name': 'دكتور', 'value': 'teacher', 'icon': Icons.school_outlined},
-    // {'name': 'موظف', 'value': 'staff', 'icon': Icons.work_outline},
+    {
+      'name': 'رئيس القسم',
+      'value': 'head_of_department',
+      'icon': Icons.work_outline,
+    },
     {
       'name': 'العميد',
       'value': 'admin',

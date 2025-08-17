@@ -6,6 +6,7 @@ import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:faculity_app2/features/auth/presentation/screens/register_screen.dart';
 import 'package:faculity_app2/features/auth/widgets/role_selector_widget.dart';
 import 'package:faculity_app2/features/exams/presentation/screens/exams_office_dashboard.dart';
+import 'package:faculity_app2/features/head_of_department/presentation/screens/head_of_department_dashboard_screen.dart';
 import 'package:faculity_app2/features/head_of_exams/presentation/screens/exams_for_publishing_screen.dart';
 import 'package:faculity_app2/features/head_of_exams/presentation/screens/head_of_exams_dashboard_screen.dart';
 import 'package:faculity_app2/features/main_screen/presentation/screens/student_main_screen.dart';
@@ -112,6 +113,9 @@ class _LoginViewState extends State<_LoginView> {
         break;
       case 'head_of_exam':
         screen = HeadOfExamsDashboardScreen(user: user);
+        break;
+      case 'head_of_department':
+        screen = HeadOfDepartmentDashboardScreen(user: user);
         break;
       case 'student':
       default:
