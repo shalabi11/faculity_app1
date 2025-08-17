@@ -1,37 +1,24 @@
 // lib/features/exams/presentation/screens/exams_schedule_screen.dart
 
-import 'package:faculity_app2/core/services/service_locator.dart';
 import 'package:faculity_app2/core/theme/app_color.dart';
 import 'package:faculity_app2/core/widget/app_state_widget.dart';
-
 import 'package:faculity_app2/features/auth/domain/entities/user.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_state.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 
+// ✨ 1. تحويل الويدجت ليصبح بسيطاً وبدون BlocProvider
 class ExamsScheduleScreen extends StatelessWidget {
   final User user;
   const ExamsScheduleScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<ExamCubit>()..fetchExams(),
-      child: const _ExamsScheduleView(),
-    );
-  }
-}
-
-class _ExamsScheduleView extends StatelessWidget {
-  const _ExamsScheduleView();
-
-  @override
-  Widget build(BuildContext context) {
+    // لا حاجة لإنشاء Cubit جديد هنا، سنستخدم الموجود في الشجرة
     return Scaffold(
       body: BlocBuilder<ExamCubit, ExamState>(
         builder: (context, state) {
@@ -72,17 +59,28 @@ class _ExamsScheduleView extends StatelessWidget {
   }
 }
 
+// lib/features/exams/presentation/screens/exams_schedule_screen.dart
+
 class _ExamCard extends StatelessWidget {
   final ExamEntity exam;
   const _ExamCard({required this.exam});
 
+  // ✨ --- 1. إضافة دالة صغيرة للترجمة --- ✨
+  String _translateExamType(String type) {
+    switch (type.toLowerCase()) {
+      case 'midterm':
+        return 'فصل أول';
+      case 'final':
+        return 'فصل ثاني';
+      default:
+        return type; // إرجاع القيمة الأصلية إذا لم تكن مطابقة
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     try {
-      // --- التصحيح هنا: تحويل النص إلى تاريخ ---
-      final DateTime examDateTime = exam.examDate as DateTime;
-
-      // ثم استخدام الكائن الجديد في التنسيق
+      final DateTime examDateTime = DateTime.parse(exam.examDate);
       final String displayDate = DateFormat(
         'd MMMM',
         'ar',
@@ -142,9 +140,10 @@ class _ExamCard extends StatelessWidget {
                       text: 'الوقت: ${exam.startTime} - ${exam.endTime}',
                     ),
                     const SizedBox(height: 6),
+                    // ✨ --- 2. استخدام دالة الترجمة هنا --- ✨
                     _InfoRow(
                       icon: Icons.bookmark_border_rounded,
-                      text: 'النوع: ${exam.type}',
+                      text: 'الفصل: ${_translateExamType(exam.type)}',
                     ),
                   ],
                 ),
@@ -154,7 +153,6 @@ class _ExamCard extends StatelessWidget {
         ),
       );
     } catch (e) {
-      // في حال كان صيغة النص غير صحيحة، نعرض التاريخ كما هو لتجنب انهيار التطبيق
       return Card(
         child: ListTile(
           title: Text(exam.courseName),
@@ -165,7 +163,6 @@ class _ExamCard extends StatelessWidget {
   }
 }
 
-// ... باقي الكود (_InfoRow) يبقى كما هو ...
 class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String text;
