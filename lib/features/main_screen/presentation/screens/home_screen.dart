@@ -7,6 +7,7 @@ import 'package:faculity_app2/features/exams/presentation/cubit/exam_state.dart'
 import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_state.dart';
 import 'package:faculity_app2/features/main_screen/presentation/widget/home_screen_widgets.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_state.dart';
+import 'package:faculity_app2/features/student/domain/entities/student.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:faculity_app2/features/auth/domain/entities/user.dart';
@@ -179,6 +180,43 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSection({
+    required BuildContext context,
+    required String title,
+    required BlocBase cubit,
+    required Widget Function(dynamic state) builder,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12.0),
+          child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
+        ),
+        // ✨ --- تم تعديل هذا الجزء بالكامل --- ✨
+        // استخدمنا BlocBuilder لضمان التعامل مع كل الحالات بشكل صحيح
+        BlocBuilder(
+          bloc: cubit as Bloc<dynamic, dynamic>,
+          builder: (context, state) {
+            // التحقق من نوع الحالة لتجنب الأخطاء
+            if (cubit is ScheduleCubit && state is ScheduleLoading ||
+                cubit is ExamCubit && state is ExamLoading ||
+                cubit is StudentExamResultsCubit &&
+                    state is StudentExamResultsLoading) {
+              return const SizedBox(
+                height: 150,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            // استدعاء دالة الـ builder الأصلية في حالة النجاح
+            return builder(state);
+          },
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 

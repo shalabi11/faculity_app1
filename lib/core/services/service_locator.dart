@@ -69,6 +69,7 @@ import 'package:faculity_app2/features/teachers/domain/repositories/teacher_repo
 import 'package:faculity_app2/features/teachers/domain/repositories/teacher_repository_impl.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/manage_teacher/manage_teacher_cubit.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_dashboard_cubit.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_job/teacher_courses_cubit.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_job/teacher_profile_cubit.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_job/teacher_schedule_cubit.dart';
@@ -103,7 +104,6 @@ Future<void> setupServiceLocator() async {
   // Features
 
   // Student Affairs
-  // --- 🌟 Student Affairs Feature (Unified) 🌟 ---
   // Cubits
   sl.registerFactory(() => StudentAffairsCubit(studentAffairsRepository: sl()));
   sl.registerFactory(
@@ -202,6 +202,13 @@ Future<void> setupServiceLocator() async {
   );
   sl.registerFactory<TeacherProfileCubit>(
     () => TeacherProfileCubit(teacherRepository: sl()),
+  );
+  sl.registerFactory<TeacherDashboardCubit>(
+    () => TeacherDashboardCubit(
+      scheduleRepository: sl(),
+      courseRepository: sl(),
+      examRepository: sl(),
+    ),
   );
 
   // Course
