@@ -17,29 +17,26 @@ class TeacherAnnouncementsScreen extends StatelessWidget {
     // ✨ ---  تم تعديل الواجهة بالكامل هنا --- ✨
     // ببساطة، سنقوم بإعادة استخدام نفس شاشة عرض الإعلانات الكاملة
     // التي يستخدمها الطالب والمدير، لأنها تحتوي على كل المنطق المطلوب.
-    return BlocProvider(
-      create: (context) => di.sl<AnnouncementCubit>()..fetchAnnouncements(),
-      child: Scaffold(
-        // استخدام AnnouncementsListScreen مباشرة يعيد استخدام الكود ويمنع التكرار
-        body: const AnnouncementsListScreen(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // عند الضغط، ننتقل إلى شاشة إضافة إعلان جديد
-            Navigator.of(context)
-                .push(
-                  MaterialPageRoute(
-                    builder: (_) => const AddEditAnnouncementScreen(),
-                  ),
-                )
-                .then((success) {
-                  // إذا تمت الإضافة بنجاح (رجعت true)، نقوم بتحديث القائمة
-                  if (success == true) {
-                    context.read<AnnouncementCubit>().fetchAnnouncements();
-                  }
-                });
-          },
-          child: const Icon(Icons.add),
-        ),
+    return Scaffold(
+      // استخدام AnnouncementsListScreen مباشرة يعيد استخدام الكود ويمنع التكرار
+      body: const AnnouncementsListScreen(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // عند الضغط، ننتقل إلى شاشة إضافة إعلان جديد
+          Navigator.of(context)
+              .push(
+                MaterialPageRoute(
+                  builder: (_) => const AddEditAnnouncementScreen(),
+                ),
+              )
+              .then((success) {
+                // إذا تمت الإضافة بنجاح (رجعت true)، نقوم بتحديث القائمة
+                if (success == true) {
+                  context.read<AnnouncementCubit>().fetchAnnouncements();
+                }
+              });
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

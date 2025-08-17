@@ -15,12 +15,7 @@ class TeacherCoursesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create:
-          (context) =>
-              di.sl<TeacherCoursesCubit>()..fetchTeacherCourses(user.name),
-      child: const _TeacherCoursesView(),
-    );
+    return const _TeacherCoursesView();
   }
 }
 

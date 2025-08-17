@@ -15,14 +15,7 @@ class TeacherScheduleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create:
-          (context) =>
-              di.sl<TeacherScheduleCubit>()
-                // ✨ ---  التعديل الأول هنا: تمرير اسم المستخدم --- ✨
-                ..fetchTeacherSchedule(user.id, user.name),
-      child: const _TeacherScheduleView(),
-    );
+    return const _TeacherScheduleView();
   }
 }
 

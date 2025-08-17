@@ -1,7 +1,13 @@
-// lib/features/teachers/presentation/screens/teacher_main_screen.dart
+// lib/features/teachers/presentation/screens/screen_of_teacher/teacher_main_screen.dart
 
+import 'package:faculity_app2/core/services/service_locator.dart' as di;
 import 'package:faculity_app2/core/theme/app_color.dart';
+import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_cubit.dart';
 import 'package:faculity_app2/features/auth/domain/entities/user.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_dashboard_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_job/teacher_courses_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_job/teacher_profile_cubit.dart';
+import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_job/teacher_schedule_cubit.dart';
 import 'package:faculity_app2/features/teachers/presentation/screens/screen_of_teacher/teacher_announcements_screen.dart';
 import 'package:faculity_app2/features/teachers/presentation/screens/screen_of_teacher/teacher_courses_screen.dart';
 import 'package:faculity_app2/features/teachers/presentation/screens/screen_of_teacher/teacher_dashboard_screen.dart';
@@ -9,16 +15,56 @@ import 'package:faculity_app2/features/teachers/presentation/screens/screen_of_t
 import 'package:faculity_app2/features/teachers/presentation/screens/screen_of_teacher/teacher_schedule_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TeacherMainScreen extends StatefulWidget {
+class TeacherMainScreen extends StatelessWidget {
   final User user;
   const TeacherMainScreen({super.key, required this.user});
 
   @override
-  State<TeacherMainScreen> createState() => _TeacherMainScreenState();
+  Widget build(BuildContext context) {
+    // ✨ --- 1. توفير كل الـ Cubits في مكان واحد --- ✨
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create:
+              (context) =>
+                  di.sl<TeacherDashboardCubit>()..fetchDashboardData(user.name),
+        ),
+        BlocProvider(
+          create:
+              (context) =>
+                  di.sl<TeacherScheduleCubit>()
+                    ..fetchTeacherSchedule(user.id, user.name),
+        ),
+        BlocProvider(
+          create:
+              (context) =>
+                  di.sl<TeacherCoursesCubit>()..fetchTeacherCourses(user.name),
+        ),
+        BlocProvider(
+          create: (context) => di.sl<AnnouncementCubit>()..fetchAnnouncements(),
+        ),
+        BlocProvider(
+          create:
+              (context) =>
+                  di.sl<TeacherProfileCubit>()..fetchTeacherDetails(user.id),
+        ),
+      ],
+      child: _TeacherMainScreenView(user: user),
+    );
+  }
 }
 
-class _TeacherMainScreenState extends State<TeacherMainScreen> {
+class _TeacherMainScreenView extends StatefulWidget {
+  final User user;
+  const _TeacherMainScreenView({required this.user});
+
+  @override
+  State<_TeacherMainScreenView> createState() => _TeacherMainScreenViewState();
+}
+
+class _TeacherMainScreenViewState extends State<_TeacherMainScreenView> {
   final PageController _pageController = PageController();
   int _selectedIndex = 0;
 

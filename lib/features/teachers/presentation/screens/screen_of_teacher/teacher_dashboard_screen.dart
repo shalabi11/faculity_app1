@@ -17,46 +17,39 @@ class TeacherDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create:
-          (context) =>
-              di.sl<TeacherDashboardCubit>()..fetchDashboardData(user.name),
-      // ✨ --- 1. إضافة Builder هنا --- ✨
-      // الـ Builder يعطينا context جديداً أسفل الـ BlocProvider
-      child: Builder(
-        builder: (context) {
-          return Scaffold(
-            body: RefreshIndicator(
-              onRefresh: () async {
-                // الآن هذا الـ context يمكنه العثور على الـ Cubit بنجاح
-                context.read<TeacherDashboardCubit>().fetchDashboardData(
-                  user.name,
-                );
+    return Builder(
+      builder: (context) {
+        return Scaffold(
+          body: RefreshIndicator(
+            onRefresh: () async {
+              // الآن هذا الـ context يمكنه العثور على الـ Cubit بنجاح
+              context.read<TeacherDashboardCubit>().fetchDashboardData(
+                user.name,
+              );
+            },
+            child: BlocBuilder<TeacherDashboardCubit, TeacherDashboardState>(
+              builder: (context, state) {
+                if (state is TeacherDashboardLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (state is TeacherDashboardFailure) {
+                  return ErrorState(
+                    message: state.message,
+                    onRetry:
+                        () => context
+                            .read<TeacherDashboardCubit>()
+                            .fetchDashboardData(user.name),
+                  );
+                }
+                if (state is TeacherDashboardSuccess) {
+                  return _buildBody(context, state);
+                }
+                return const SizedBox.shrink();
               },
-              child: BlocBuilder<TeacherDashboardCubit, TeacherDashboardState>(
-                builder: (context, state) {
-                  if (state is TeacherDashboardLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (state is TeacherDashboardFailure) {
-                    return ErrorState(
-                      message: state.message,
-                      onRetry:
-                          () => context
-                              .read<TeacherDashboardCubit>()
-                              .fetchDashboardData(user.name),
-                    );
-                  }
-                  if (state is TeacherDashboardSuccess) {
-                    return _buildBody(context, state);
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
