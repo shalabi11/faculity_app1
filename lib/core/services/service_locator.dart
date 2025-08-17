@@ -2,6 +2,7 @@
 import 'package:dio/dio.dart';
 import 'package:faculity_app2/core/platform/network_info.dart';
 import 'package:faculity_app2/core/theme/cubit/theme_cubit.dart';
+import 'package:faculity_app2/features/admin/presentation/cubit/admin_dashboard_cubit.dart';
 import 'package:faculity_app2/features/announcements/data/datasources/announcement_remote_data_source.dart';
 import 'package:faculity_app2/features/announcements/domain/repositories/announcement_repository.dart';
 import 'package:faculity_app2/features/announcements/domain/repositories/announcement_repository_impl.dart';
@@ -127,7 +128,14 @@ Future<void> setupServiceLocator() async {
     () => StudentAffairsRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
   // --- End of Student Affairs Feature ---
-
+  // Admin
+  sl.registerFactory(
+    () => AdminDashboardCubit(
+      studentRepository: sl(),
+      teacherRepository: sl(),
+      courseRepository: sl(),
+    ),
+  );
   // Auth
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),

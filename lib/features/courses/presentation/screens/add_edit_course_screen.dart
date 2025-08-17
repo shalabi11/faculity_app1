@@ -126,7 +126,7 @@ class _AddEditCourseViewState extends State<_AddEditCourseView> {
               BlocBuilder<ManageCourseCubit, ManageCourseState>(
                 builder: (context, state) {
                   if (state is ManageCourseLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingList());
                   }
                   return ElevatedButton(
                     onPressed: _submitForm,

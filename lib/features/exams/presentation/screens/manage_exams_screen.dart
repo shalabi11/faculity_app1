@@ -1,4 +1,7 @@
+// lib/features/exams/presentation/screens/manage_exams_screen.dart
+
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/services/service_locator.dart' as di;
 import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/exams/domain/enteties/exam.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
@@ -16,13 +19,12 @@ class ManageExamsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => sl<ExamCubit>()..fetchExams()),
-        BlocProvider(create: (context) => sl<ManageExamCubit>()),
+        BlocProvider(create: (context) => di.sl<ExamCubit>()..fetchExams()),
+        BlocProvider(create: (context) => di.sl<ManageExamCubit>()),
       ],
       child: Scaffold(
         appBar: AppBar(
           title: const Text('إدارة الامتحانات'),
-          // ✨ --- تم إضافة هذا الزر --- ✨
           actions: [
             IconButton(
               icon: const Icon(Icons.grading_outlined),
@@ -37,10 +39,12 @@ class ManageExamsScreen extends StatelessWidget {
             ),
           ],
         ),
+        // عرض الواجهة مباشرة بدون Scaffold إضافي
         body: const _ManageExamsView(),
         floatingActionButton: Builder(
           builder:
               (context) => FloatingActionButton(
+                heroTag: 'add_exam_fab',
                 onPressed: () async {
                   final result = await Navigator.of(context).push<bool>(
                     MaterialPageRoute(
@@ -88,91 +92,80 @@ class _ManageExamsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('إدارة الامتحانات')),
-      body: BlocListener<ManageExamCubit, ManageExamState>(
-        listener: (context, state) {
-          if (state is ManageExamSuccess) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            context.read<ExamCubit>().fetchExams();
-          } else if (state is ManageExamFailure) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
+    return BlocListener<ManageExamCubit, ManageExamState>(
+      listener: (context, state) {
+        if (state is ManageExamSuccess) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+              ),
+            );
+          context.read<ExamCubit>().fetchExams();
+        } else if (state is ManageExamFailure) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+        }
+      },
+      child: BlocBuilder<ExamCubit, ExamState>(
+        builder: (context, state) {
+          if (state is ExamLoading) {
+            return const Center(child: CircularProgressIndicator());
           }
-        },
-        child: BlocBuilder<ExamCubit, ExamState>(
-          builder: (context, state) {
-            if (state is ExamLoading) {
-              return const Center(child: LoadingList());
+          if (state is ExamError) {
+            return ErrorState(
+              message: state.message,
+              onRetry: () => context.read<ExamCubit>().fetchExams(),
+            );
+          }
+          if (state is ExamLoaded) {
+            if (state.exams.isEmpty) {
+              return const Center(child: Text('لا توجد امتحانات لعرضها.'));
             }
-            if (state is ExamError) {
-              return Center(child: Text('حدث خطأ: ${state.message}'));
-            }
-            if (state is ExamLoaded) {
-              if (state.exams.isEmpty) {
-                return const Center(child: Text('لا توجد امتحانات لعرضها.'));
-              }
-              return ListView.builder(
-                itemCount: state.exams.length,
-                itemBuilder: (context, index) {
-                  final exam = state.exams[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+            return ListView.builder(
+              itemCount: state.exams.length,
+              itemBuilder: (context, index) {
+                final exam = state.exams[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: ListTile(
+                    title: Text(exam.courseName),
+                    subtitle: Text(
+                      'التاريخ: ${exam.examDate} | الوقت: ${exam.startTime}',
                     ),
-                    child: ListTile(
-                      title: Text(exam.courseName),
-                      subtitle: Text(
-                        'التاريخ: ${exam.examDate} | الوقت: ${exam.startTime}',
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: () => _showDeleteDialog(context, exam),
+                    ),
+                    onTap: () async {
+                      final result = await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(
+                          builder: (_) => AddEditExamScreen(exam: exam),
                         ),
-                        onPressed: () => _showDeleteDialog(context, exam),
-                      ),
-                      onTap: () async {
-                        final result = await Navigator.of(context).push<bool>(
-                          MaterialPageRoute(
-                            builder: (_) => AddEditExamScreen(exam: exam),
-                          ),
-                        );
-                        if (result == true)
-                          context.read<ExamCubit>().fetchExams();
-                      },
-                    ),
-                  );
-                },
-              );
-            }
-            return const Center(child: Text('ابدأ بتحميل الامتحانات.'));
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(builder: (_) => const AddEditExamScreen()),
-          );
-          // ignore: use_build_context_synchronously
-          if (result == true) context.read<ExamCubit>().fetchExams();
+                      );
+                      if (result == true) {
+                        // ignore: use_build_context_synchronously
+                        context.read<ExamCubit>().fetchExams();
+                      }
+                    },
+                  ),
+                );
+              },
+            );
+          }
+          return const Center(child: Text('ابدأ بتحميل الامتحانات.'));
         },
-        child: const Icon(Icons.add),
       ),
     );
   }

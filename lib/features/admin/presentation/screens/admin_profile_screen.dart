@@ -2,6 +2,7 @@
 
 import 'package:faculity_app2/core/theme/app_color.dart';
 import 'package:faculity_app2/core/widget/app_state_widget.dart';
+import 'package:faculity_app2/features/auth/domain/entities/user.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_state.dart';
 import 'package:faculity_app2/features/auth/presentation/screens/login_screen.dart';
@@ -9,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AdminProfileScreen extends StatelessWidget {
-  const AdminProfileScreen({super.key});
+  final User user;
+  const AdminProfileScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {

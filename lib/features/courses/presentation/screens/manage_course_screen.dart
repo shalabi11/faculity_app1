@@ -84,7 +84,7 @@ class _ManageCoursesView extends StatelessWidget {
         child: BlocBuilder<CourseCubit, CourseState>(
           builder: (context, state) {
             if (state is CourseLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingList());
             }
             if (state is CourseError) {
               return ErrorState(

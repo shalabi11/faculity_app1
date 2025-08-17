@@ -21,7 +21,7 @@ class LoadingList extends StatelessWidget {
             (index) => Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
-                side: BorderSide(color: Colors.grey.shade200),
+                side: BorderSide(color: Colors.grey.shade500),
                 borderRadius: BorderRadius.circular(12),
               ),
               margin: const EdgeInsets.only(bottom: 12),
