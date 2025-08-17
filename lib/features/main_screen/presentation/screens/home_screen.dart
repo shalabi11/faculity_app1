@@ -1,20 +1,20 @@
 // lib/features/main_screen/presentation/screens/home_screen.dart
 
+import 'package:collection/collection.dart';
 import 'package:faculity_app2/core/widget/app_state_widget.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_state.dart';
 import 'package:faculity_app2/features/announcements/presentation/screens/announcements_list_screen.dart';
+import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/exam_state.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_state.dart';
 import 'package:faculity_app2/features/main_screen/presentation/widget/home_screen_widgets.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_state.dart';
-import 'package:faculity_app2/features/student/domain/entities/student.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:faculity_app2/features/auth/domain/entities/user.dart';
 import 'package:faculity_app2/features/schedule/presentation/cubit/schedule_cubit.dart';
 import 'package:faculity_app2/features/exams/presentation/cubit/student_exam_results_cubit.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_cubit.dart';
-import 'package:faculity_app2/features/exams/presentation/cubit/exam_cubit.dart';
 import 'package:faculity_app2/features/announcements/domain/entities/announcement.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -55,122 +55,116 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 24.0,
-            ),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                    _WelcomeHeader(
-                      userName: widget.user.name,
-                    ).animate().fade(duration: 400.ms),
+                    _WelcomeHeader(userName: widget.user.name),
                     const SizedBox(height: 24),
 
-                    // --- ✨ تم تعديل هذا الجزء بالكامل --- ✨
+                    // ✨ --- 1. استخدام بطاقات مخصصة لكل قسم --- ✨
 
-                    // قسم نظرة على أسبوعك
-                    _buildSectionTitle(context, "نظرة على أسبوعك"),
-                    BlocBuilder<ScheduleCubit, ScheduleState>(
-                      builder: (context, state) {
-                        if (state is ScheduleLoading) {
-                          return const SizedBox(
-                            height: 150,
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        if (state is ScheduleFailure) {
-                          return ErrorState(
-                            message: state.message,
-                            onRetry: () => _refreshData(context),
-                          );
-                        }
-                        if (state is ScheduleSuccess) {
-                          if (state.schedule.isEmpty) {
-                            return const Text("لا يوجد محاضرات في جدولك.");
+                    // بطاقة نظرة على أسبوعك
+                    _DashboardCard(
+                      title: "نظرة على أسبوعك",
+                      icon: Icons.bar_chart_outlined,
+                      child: BlocBuilder<ScheduleCubit, ScheduleState>(
+                        builder: (context, state) {
+                          if (state is ScheduleLoading) {
+                            return const _LoadingPlaceholder();
                           }
-                          return WeeklyScheduleChart(schedule: state.schedule);
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                    const SizedBox(height: 24),
-
-                    // قسم الامتحان القادم
-                    _buildSectionTitle(context, "الامتحان القادم"),
-                    BlocBuilder<ExamCubit, ExamState>(
-                      builder: (context, state) {
-                        if (state is ExamLoading) {
-                          return const SizedBox(
-                            height: 150,
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        if (state is ExamError) {
-                          return ErrorState(
-                            message: state.message,
-                            onRetry: () => _refreshData(context),
-                          );
-                        }
-                        if (state is ExamLoaded) {
-                          final now = DateTime.now();
-                          final today = DateTime(now.year, now.month, now.day);
-                          final upcomingExams =
-                              state.exams.where((exam) {
-                                try {
-                                  final examDate = DateTime.parse(
-                                    exam.examDate,
-                                  );
-                                  return !examDate.isBefore(today);
-                                } catch (e) {
-                                  return false;
-                                }
-                              }).toList();
-                          if (upcomingExams.isEmpty) {
-                            return const Text("لا يوجد امتحانات قادمة.");
+                          if (state is ScheduleFailure) {
+                            return Text(state.message);
                           }
-                          upcomingExams.sort(
-                            (a, b) => DateTime.parse(
-                              a.examDate,
-                            ).compareTo(DateTime.parse(b.examDate)),
-                          );
-                          return ExamCountdownWidget(exam: upcomingExams.first);
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                    const SizedBox(height: 24),
-
-                    // قسم أداء العلامات
-                    _buildSectionTitle(context, "أداء العلامات"),
-                    BlocBuilder<
-                      StudentExamResultsCubit,
-                      StudentExamResultsState
-                    >(
-                      builder: (context, state) {
-                        if (state is StudentExamResultsLoading) {
-                          return const SizedBox(
-                            height: 150,
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        if (state is StudentExamResultsFailure) {
-                          return ErrorState(
-                            message: state.message,
-                            onRetry: () => _refreshData(context),
-                          );
-                        }
-                        if (state is StudentExamResultsSuccess) {
-                          if (state.results.isEmpty) {
-                            return const Text("لم تصدر أي نتائج بعد.");
+                          if (state is ScheduleSuccess) {
+                            return WeeklyScheduleChart(
+                              schedule: state.schedule,
+                            );
                           }
-                          return GradesPerformanceChart(results: state.results);
-                        }
-                        return const SizedBox.shrink();
-                      },
+                          return const SizedBox.shrink();
+                        },
+                      ),
                     ),
-                    const SizedBox(height: 24),
 
+                    // بطاقة الامتحان القادم
+                    _DashboardCard(
+                      title: "الامتحان القادم",
+                      icon: Icons.edit_calendar_outlined,
+                      child: BlocBuilder<ExamCubit, ExamState>(
+                        builder: (context, state) {
+                          if (state is ExamLoading) {
+                            return const _LoadingPlaceholder();
+                          }
+                          if (state is ExamError) {
+                            return Text(state.message);
+                          }
+                          if (state is ExamLoaded) {
+                            final now = DateTime.now();
+                            final today = DateTime(
+                              now.year,
+                              now.month,
+                              now.day,
+                            );
+                            final upcomingExams =
+                                state.exams.where((exam) {
+                                  try {
+                                    final examDate = DateTime.parse(
+                                      exam.examDate,
+                                    );
+                                    return !examDate.isBefore(today);
+                                  } catch (e) {
+                                    return false;
+                                  }
+                                }).toList();
+                            upcomingExams.sort(
+                              (a, b) => DateTime.parse(
+                                a.examDate,
+                              ).compareTo(DateTime.parse(b.examDate)),
+                            );
+                            final nextExam = upcomingExams.firstOrNull;
+                            if (nextExam == null) {
+                              return const Center(
+                                child: Text("لا يوجد امتحانات قادمة."),
+                              );
+                            }
+                            return ExamCountdownWidget(exam: nextExam);
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ),
+
+                    // بطاقة أداء العلامات
+                    _DashboardCard(
+                      title: "أداء العلامات",
+                      icon: Icons.show_chart_outlined,
+                      child: BlocBuilder<
+                        StudentExamResultsCubit,
+                        StudentExamResultsState
+                      >(
+                        builder: (context, state) {
+                          if (state is StudentExamResultsLoading) {
+                            return const _LoadingPlaceholder();
+                          }
+                          if (state is StudentExamResultsFailure) {
+                            return Text(state.message);
+                          }
+                          if (state is StudentExamResultsSuccess) {
+                            if (state.results.isEmpty) {
+                              return const Center(
+                                child: Text("لم تصدر أي نتائج بعد."),
+                              );
+                            }
+                            return GradesPerformanceChart(
+                              results: state.results,
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ),
+
+                    // قسم الإعلانات (يمكن تركه كما هو أو وضعه في بطاقة أيضاً)
                     _RecentAnnouncementsSection(),
                   ]
                   .animate(interval: 100.ms)
@@ -182,53 +176,61 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 
-  Widget _buildSection({
-    required BuildContext context,
-    required String title,
-    required BlocBase cubit,
-    required Widget Function(dynamic state) builder,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
-        ),
-        // ✨ --- تم تعديل هذا الجزء بالكامل --- ✨
-        // استخدمنا BlocBuilder لضمان التعامل مع كل الحالات بشكل صحيح
-        BlocBuilder(
-          bloc: cubit as Bloc<dynamic, dynamic>,
-          builder: (context, state) {
-            // التحقق من نوع الحالة لتجنب الأخطاء
-            if (cubit is ScheduleCubit && state is ScheduleLoading ||
-                cubit is ExamCubit && state is ExamLoading ||
-                cubit is StudentExamResultsCubit &&
-                    state is StudentExamResultsLoading) {
-              return const SizedBox(
-                height: 150,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            // استدعاء دالة الـ builder الأصلية في حالة النجاح
-            return builder(state);
-          },
-        ),
-        const SizedBox(height: 24),
-      ],
-    );
-  }
+// ✨ --- 2. ويدجت جديد وموحد لشكل بطاقات لوحة التحكم --- ✨
+class _DashboardCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Widget child;
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
+  const _DashboardCard({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: Theme.of(context).primaryColor),
+                const SizedBox(width: 8),
+                Text(title, style: Theme.of(context).textTheme.titleLarge),
+              ],
+            ),
+            const Divider(height: 24),
+            child,
+          ],
+        ),
+      ),
     );
   }
 }
 
-// (بقية الويدجتس تبقى كما هي)
+// ويدجت بسيط لعرضه أثناء التحميل داخل البطاقة
+class _LoadingPlaceholder extends StatelessWidget {
+  const _LoadingPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 150,
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+}
+
 class _WelcomeHeader extends StatelessWidget {
   final String userName;
   const _WelcomeHeader({required this.userName});

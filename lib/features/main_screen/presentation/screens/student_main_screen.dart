@@ -1,6 +1,7 @@
 // lib/features/main_screen/presentation/screens/student_main_screen.dart
 
 import 'package:faculity_app2/core/services/service_locator.dart';
+import 'package:faculity_app2/core/services/service_locator.dart' as di;
 import 'package:faculity_app2/core/theme/app_color.dart';
 import 'package:faculity_app2/features/auth/domain/entities/user.dart';
 import 'package:faculity_app2/features/announcements/presentation/cubit/announcement_cubit.dart';
@@ -23,23 +24,23 @@ class StudentMainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✨ --- تم التعديل الكامل هنا --- ✨
-    // تم نقل MultiBlocProvider ليغلف الشاشة بأكملها
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create:
-              (context) =>
-                  sl<ScheduleCubit>()..fetchStudentWeeklySchedule(
-                    year: user.year,
-                    section: user.section,
-                  ),
-        ),
-        BlocProvider(
-          create:
-              (context) =>
-                  sl<ScheduleCubit>()
-                    ..fetchTheorySchedule(year: user.year ?? ''),
+          create: (context) {
+            // ✨ --- هذا هو الجزء الذي تم تعديله --- ✨
+            final cubit = di.sl<ScheduleCubit>();
+            // إضافة تأخير بسيط جداً قبل أول طلب للبيانات
+            Future.delayed(const Duration(milliseconds: 200), () {
+              if (!cubit.isClosed) {
+                cubit.fetchStudentWeeklySchedule(
+                  year: user.year,
+                  section: user.section,
+                );
+              }
+            });
+            return cubit;
+          },
         ),
         BlocProvider(
           create:
