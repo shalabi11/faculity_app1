@@ -1,82 +1,69 @@
-// lib/features/student_affairs/presentation/screens/add_edit_student_screen.dart
+// lib/features/student_affairs/presentation/screens/add_student_screen.dart
 
-import 'dart:io';
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
 import 'package:faculity_app2/core/widget/app_state_widget.dart';
-import 'package:faculity_app2/core/widget/year_dropdown_form_field.dart'; // ✨ 1. استيراد الويدجت
-import 'package:faculity_app2/features/student/domain/entities/student.dart';
 import 'package:faculity_app2/features/student_affairs/presentation/cubit/manage_student_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart'; // ✨ استيراد ضروري لتنسيق التاريخ
 
-class AddEditStudentScreen extends StatelessWidget {
-  final Student? student;
-  const AddEditStudentScreen({super.key, this.student});
+class AddStudentScreen extends StatelessWidget {
+  final Map<String, dynamic>? initialData;
+
+  const AddStudentScreen({super.key, this.initialData});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => di.sl<ManageStudentCubit>(),
-      child: _AddEditStudentView(student: student),
+      child: _AddStudentForm(initialData: initialData),
     );
   }
 }
 
-class _AddEditStudentView extends StatefulWidget {
-  final Student? student;
-  const _AddEditStudentView({this.student});
+class _AddStudentForm extends StatefulWidget {
+  final Map<String, dynamic>? initialData;
+
+  const _AddStudentForm({this.initialData});
 
   @override
-  State<_AddEditStudentView> createState() => _AddEditStudentViewState();
+  State<_AddStudentForm> createState() => _AddStudentFormState();
 }
 
-class _AddEditStudentViewState extends State<_AddEditStudentView> {
+class _AddStudentFormState extends State<_AddStudentForm> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _fullNameController;
-  late TextEditingController _universityIdController;
-  late TextEditingController _motherNameController;
-  late TextEditingController _birthPlaceController;
-  late TextEditingController _departmentController;
-  late TextEditingController _gpaController;
-  String? _selectedYear;
-  DateTime? _selectedBirthDate;
-  File? _profileImage;
-  final ImagePicker _picker = ImagePicker();
 
-  bool get _isEditMode => widget.student != null;
+  final _fullNameController = TextEditingController();
+  final _universityIdController = TextEditingController();
+  final _motherNameController = TextEditingController();
+  final _birthDateController = TextEditingController();
+  final _birthPlaceController = TextEditingController();
+  final _departmentController = TextEditingController();
+  final _gpaController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _fullNameController = TextEditingController(
-      text: widget.student?.fullName ?? '',
-    );
-    _universityIdController = TextEditingController(
-      text: widget.student?.universityId ?? '',
-    );
-    _motherNameController = TextEditingController(
-      text: widget.student?.motherName ?? '',
-    );
-    _birthPlaceController = TextEditingController(
-      text: widget.student?.birthPlace ?? '',
-    );
-    _departmentController = TextEditingController(
-      text: widget.student?.department ?? '',
-    );
-    _gpaController = TextEditingController(
-      text: widget.student?.highSchoolGpa.toString() ?? '',
-    );
-
-    if (_isEditMode) {
-      _selectedYear = widget.student!.year;
+    if (widget.initialData != null) {
+      _fullNameController.text = widget.initialData!['name'] ?? '';
+      _universityIdController.text = widget.initialData!['university_id'] ?? '';
+      _departmentController.text = _mapDepartment(
+        widget.initialData!['department'],
+      );
     }
+  }
 
-    _selectedBirthDate =
-        widget.student != null
-            ? DateTime.tryParse(widget.student!.birthDate)
-            : null;
+  String _mapDepartment(String? code) {
+    switch (code) {
+      case 'SE':
+        return 'هندسة البرمجيات';
+      case 'AI':
+        return 'الذكاء الصنعي';
+      case 'NE':
+        return 'الشبكات';
+      default:
+        return '';
+    }
   }
 
   @override
@@ -84,219 +71,170 @@ class _AddEditStudentViewState extends State<_AddEditStudentView> {
     _fullNameController.dispose();
     _universityIdController.dispose();
     _motherNameController.dispose();
+    _birthDateController.dispose();
     _birthPlaceController.dispose();
     _departmentController.dispose();
     _gpaController.dispose();
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 50,
-    );
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
-    }
-  }
-
-  Future<void> _pickDate() async {
-    final pickedDate = await showDatePicker(
+  // ✨ --- 1. دالة لفتح منتقي التاريخ --- ✨
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedBirthDate ?? DateTime(2002, 1, 1),
-      firstDate: DateTime(1980),
-      lastDate: DateTime.now(),
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1980), // تاريخ بداية معقول
+      lastDate: DateTime.now(), // لا يمكن اختيار تاريخ في المستقبل
     );
-    if (pickedDate != null && pickedDate != _selectedBirthDate) {
+    if (picked != null) {
       setState(() {
-        _selectedBirthDate = pickedDate;
+        // تنسيق التاريخ بالشكل المطلوب (YYYY-MM-DD)
+        _birthDateController.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
   }
 
-  void _submitForm() {
+  void _saveStudentData() {
     if (_formKey.currentState!.validate()) {
       final studentData = {
-        'full_name': _fullNameController.text,
-        'university_id': _universityIdController.text,
-        'mother_name': _motherNameController.text,
-        'birth_date':
-            _selectedBirthDate != null
-                ? DateFormat('yyyy-MM-dd').format(_selectedBirthDate!)
-                : '',
-        'birth_place': _birthPlaceController.text,
-        'department': _departmentController.text,
-        'year': _selectedYear ?? '',
-        'high_school_gpa': _gpaController.text,
+        'full_name': _fullNameController.text.trim(),
+        'university_id': _universityIdController.text.trim(),
+        'mother_name': _motherNameController.text.trim(),
+        'birth_date': _birthDateController.text.trim(),
+        'birth_place': _birthPlaceController.text.trim(),
+        'department': _departmentController.text.trim(),
+        'high_school_gpa': _gpaController.text.trim(),
       };
-
-      if (_isEditMode) {
-        context.read<ManageStudentCubit>().updateStudent(
-          id: widget.student!.id,
-          studentData: studentData,
-        );
-      } else {
-        context.read<ManageStudentCubit>().addStudent(
-          studentData: studentData,
-          image: _profileImage,
-        );
-      }
+      context.read<ManageStudentCubit>().addStudent(studentData: studentData);
     }
-  }
-
-  String? _validateField(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'هذا الحقل مطلوب';
-    }
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditMode ? 'تعديل بيانات الطالب' : 'إضافة طالب جديد'),
-      ),
-      body: BlocListener<ManageStudentCubit, ManageStudentState>(
-        listener: (context, state) async {
+      appBar: AppBar(title: const Text('إكمال بيانات الطالب')),
+      body: BlocConsumer<ManageStudentCubit, ManageStudentState>(
+        listener: (context, state) {
           if (state is ManageStudentSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
+              const SnackBar(
+                content: Text('تمت إضافة بيانات الطالب بنجاح!'),
                 backgroundColor: Colors.green,
               ),
             );
-            await Future.delayed(const Duration(milliseconds: 500));
-            if (mounted) Navigator.of(context).pop(true);
+            int count = 0;
+            Navigator.of(context).popUntil((_) => count++ >= 2);
           } else if (state is ManageStudentFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text('فشل إضافة البيانات: ${state.message}'),
                 backgroundColor: Colors.red,
               ),
             );
           }
         },
-        child: Form(
-          key: _formKey,
-          child: ListView(
+        builder: (context, state) {
+          final isLoading = state is ManageStudentLoading;
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-            children: [
-              if (!_isEditMode) ...[
-                _buildImagePicker(),
-                const SizedBox(height: 16),
-              ],
-              TextFormField(
-                controller: _fullNameController,
-                decoration: const InputDecoration(labelText: 'الاسم الكامل'),
-                validator: _validateField,
-              ),
-              TextFormField(
-                controller: _universityIdController,
-                decoration: const InputDecoration(labelText: 'الرقم الجامعي'),
-                validator: _validateField,
-              ),
-              TextFormField(
-                controller: _motherNameController,
-                decoration: const InputDecoration(labelText: 'اسم الأم'),
-                validator: _validateField,
-              ),
-              TextFormField(
-                controller: _birthPlaceController,
-                decoration: const InputDecoration(labelText: 'مكان الولادة'),
-                validator: _validateField,
-              ),
-              TextFormField(
-                controller: _departmentController,
-                decoration: const InputDecoration(labelText: 'القسم'),
-                validator: _validateField,
-              ),
-              const SizedBox(height: 16),
-              // ✨ 2. استدعاء الويدجت الجديد هنا ✨
-              YearDropdownFormField(
-                selectedYear: _selectedYear,
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedYear = newValue;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _gpaController,
-                decoration: const InputDecoration(labelText: 'معدل الثانوية'),
-                keyboardType: TextInputType.number,
-                validator: _validateField,
-              ),
-              const SizedBox(height: 16),
-              _buildDatePicker(),
-              const SizedBox(height: 24),
-              BlocBuilder<ManageStudentCubit, ManageStudentState>(
-                builder: (context, state) {
-                  if (state is ManageStudentLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  return ElevatedButton.icon(
-                    onPressed: _submitForm,
-                    icon: const Icon(Icons.save),
-                    label: Text(_isEditMode ? 'حفظ التعديلات' : 'حفظ الطالب'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildTextField(
+                    controller: _fullNameController,
+                    label: 'الاسم الكامل',
+                    readOnly: widget.initialData != null,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _universityIdController,
+                    label: 'الرقم الجامعي',
+                    readOnly: widget.initialData != null,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _motherNameController,
+                    label: 'اسم الأم',
+                  ),
+                  const SizedBox(height: 16),
+                  // ✨ --- 2. تعديل حقل تاريخ الميلاد --- ✨
+                  TextFormField(
+                    controller: _birthDateController,
+                    readOnly: true, // جعله للقراءة فقط لمنع الكتابة اليدوية
+                    decoration: const InputDecoration(
+                      labelText: 'تاريخ الميلاد',
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.calendar_today),
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+                    onTap: () => _selectDate(context), // فتح التقويم عند الضغط
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'هذا الحقل مطلوب';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _birthPlaceController,
+                    label: 'مكان الولادة',
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _departmentController,
+                    label: 'القسم',
+                    readOnly: widget.initialData != null,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _gpaController,
+                    label: 'معدل الثانوية',
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: isLoading ? null : _saveStudentData,
 
-  Widget _buildImagePicker() {
-    return Center(
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundImage:
-                _profileImage != null ? FileImage(_profileImage!) : null,
-            child:
-                _profileImage == null
-                    ? const Icon(Icons.person, size: 50)
-                    : null,
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: InkWell(
-              onTap: _pickImage,
-              child: const CircleAvatar(
-                radius: 18,
-                backgroundColor: Colors.blue,
-                child: Icon(Icons.edit, color: Colors.white, size: 20),
+                    child:
+                        isLoading
+                            ? const LoadingList(
+                              // color: Colors.white,
+                            )
+                            : const Text('حفظ وإنهاء'),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildDatePicker() {
-    return OutlinedButton.icon(
-      onPressed: _pickDate,
-      icon: const Icon(Icons.calendar_today),
-      label: Text(
-        _selectedBirthDate == null
-            ? 'اختر تاريخ الميلاد'
-            : DateFormat('dd / MM / yyyy').format(_selectedBirthDate!),
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool readOnly = false,
+    TextInputType? keyboardType,
+  }) {
+    return TextFormField(
+      controller: controller,
+      readOnly: readOnly,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        fillColor: readOnly ? Colors.grey.shade200 : null,
+        filled: readOnly,
       ),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'هذا الحقل مطلوب';
+        }
+        return null;
+      },
     );
   }
 }

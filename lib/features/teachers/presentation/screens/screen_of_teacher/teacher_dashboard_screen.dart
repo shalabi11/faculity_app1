@@ -30,7 +30,7 @@ class TeacherDashboardScreen extends StatelessWidget {
             child: BlocBuilder<TeacherDashboardCubit, TeacherDashboardState>(
               builder: (context, state) {
                 if (state is TeacherDashboardLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: LoadingList());
                 }
                 if (state is TeacherDashboardFailure) {
                   return ErrorState(

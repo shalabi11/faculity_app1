@@ -9,6 +9,7 @@ class UserModel extends User {
     super.token,
     super.year,
     super.section,
+    super.universityId,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +19,7 @@ class UserModel extends User {
         {};
 
     return UserModel(
+      universityId: json['university_id']?.toString(),
       id: int.tryParse(userData['id']?.toString() ?? '0') ?? 0,
       name: userData['name'] ?? 'مستخدم غير معروف',
       email: userData['email'] ?? '',

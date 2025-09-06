@@ -3,6 +3,7 @@ import 'package:faculity_app2/core/bloc/simple_bloc_observer.dart';
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
 import 'package:faculity_app2/core/theme/app_theme.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:faculity_app2/features/auth/presentation/screens/register_screen.dart';
 import 'package:faculity_app2/features/splash/presentation/views/splash_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

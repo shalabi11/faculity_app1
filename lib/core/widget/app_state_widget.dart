@@ -19,7 +19,7 @@ class LoadingList extends StatelessWidget {
           children: List.generate(
             itemCount,
             (index) => Card(
-              elevation: 0,
+              elevation: 10,
               shape: RoundedRectangleBorder(
                 side: BorderSide(color: Colors.grey.shade500),
                 borderRadius: BorderRadius.circular(12),

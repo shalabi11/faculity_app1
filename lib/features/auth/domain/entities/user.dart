@@ -9,6 +9,7 @@ class User extends Equatable {
   final String? token;
   final String? year;
   final String? section;
+  final String? universityId;
 
   // تم تعديل الـ constructor ليناسب final role
   const User({
@@ -19,6 +20,7 @@ class User extends Equatable {
     this.token,
     this.year,
     this.section,
+    this.universityId,
   });
 
   // --- ✅ هذا هو التعديل المطلوب ✅ ---

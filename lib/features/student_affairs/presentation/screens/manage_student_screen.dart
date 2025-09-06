@@ -110,10 +110,7 @@ class _ManageStudentsView extends StatelessWidget {
                           () => _showDeleteConfirmationDialog(context, student),
                       onEdit: () async {
                         final result = await Navigator.of(context).push<bool>(
-                          MaterialPageRoute(
-                            builder:
-                                (_) => AddEditStudentScreen(student: student),
-                          ),
+                          MaterialPageRoute(builder: (_) => AddStudentScreen()),
                         );
                         if (result == true) {
                           context.read<StudentAffairsCubit>().fetchStudents();
@@ -142,7 +139,7 @@ class _ManageStudentsView extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(builder: (_) => const AddEditStudentScreen()),
+            MaterialPageRoute(builder: (_) => const AddStudentScreen()),
           );
           if (result == true) {
             context.read<StudentAffairsCubit>().fetchStudents();

@@ -56,7 +56,7 @@ class StudentAffairsProfileScreen extends StatelessWidget {
                       _buildInfoRow(
                         Icons.verified_user_outlined,
                         'الدور',
-                        user.role,
+                        'شؤون الطلاب',
                       ),
                     ],
                   ),

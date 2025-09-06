@@ -235,7 +235,7 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
               BlocBuilder<ManageExamCubit, ManageExamState>(
                 builder: (context, state) {
                   if (state is ManageExamLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: LoadingList());
                   }
                   return ElevatedButton(
                     onPressed: _submitForm,

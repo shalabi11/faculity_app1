@@ -1,14 +1,13 @@
 // lib/features/student_affairs/presentation/screens/students_by_year_screen.dart
 
-import 'package:faculity_app2/features/student/data/models/student_model.dart';
+import 'package:faculity_app2/features/student/domain/entities/student.dart'; // ✨ تم التغيير إلى Student
 import 'package:flutter/material.dart';
 import 'student_details_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-// ✨ 1. تحويل الويدجت إلى StatefulWidget لإدارة حالة البحث
 class StudentsByYearScreen extends StatefulWidget {
   final String year;
-  final List<StudentModel> students;
+  final List<Student> students; // ✨ تم التغيير إلى Student
 
   const StudentsByYearScreen({
     super.key,
@@ -21,7 +20,7 @@ class StudentsByYearScreen extends StatefulWidget {
 }
 
 class _StudentsByYearScreenState extends State<StudentsByYearScreen> {
-  late List<StudentModel> _filteredStudents;
+  late List<Student> _filteredStudents; // ✨ تم التغيير إلى Student
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -58,7 +57,6 @@ class _StudentsByYearScreenState extends State<StudentsByYearScreen> {
       ),
       body: Column(
         children: [
-          // ✨ 2. إضافة حقل البحث
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
@@ -84,7 +82,6 @@ class _StudentsByYearScreenState extends State<StudentsByYearScreen> {
                       itemCount: _filteredStudents.length,
                       itemBuilder: (context, index) {
                         final student = _filteredStudents[index];
-                        // ✨ 3. استخدام بطاقة الطالب الجديدة
                         return _StudentCard(student: student)
                             .animate()
                             .fade(delay: (100 * index).ms)
@@ -98,9 +95,8 @@ class _StudentsByYearScreenState extends State<StudentsByYearScreen> {
   }
 }
 
-// ✨ --- 4. ويدجت جديد لبطاقة الطالب بتصميم محسن --- ✨
 class _StudentCard extends StatelessWidget {
-  final StudentModel student;
+  final Student student; // ✨ تم التغيير إلى Student
   const _StudentCard({required this.student});
 
   @override

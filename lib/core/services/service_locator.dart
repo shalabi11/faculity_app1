@@ -65,6 +65,7 @@ import 'package:faculity_app2/features/student_affairs/data/repositories/student
 import 'package:faculity_app2/features/student_affairs/data/repositories/student_affairs_repository_impl.dart';
 import 'package:faculity_app2/features/student_affairs/domain/entities/usecases/add_student.dart';
 import 'package:faculity_app2/features/student_affairs/domain/entities/usecases/get_student_dashboard_data.dart';
+import 'package:faculity_app2/features/student_affairs/presentation/cubit/all_students_cubit.dart';
 import 'package:faculity_app2/features/student_affairs/presentation/cubit/student_affairs_dashboard_cubit.dart';
 import 'package:faculity_app2/features/teachers/data/datasources/teacher_remote_data_source.dart';
 import 'package:faculity_app2/features/teachers/domain/repositories/teacher_repository.dart';
@@ -117,6 +118,7 @@ Future<void> setupServiceLocator() async {
       // appUserRepository: sl(),
     ),
   );
+  sl.registerFactory(() => AllStudentsCubit(studentAffairsRepository: sl()));
 
   // Repository
   sl.registerLazySingleton<StudentAffairsRepository>(

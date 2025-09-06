@@ -132,7 +132,7 @@ class _DistributeHallsViewState extends State<_DistributeHallsView> {
         BlocBuilder<ExamCubit, ExamState>(
           builder: (context, state) {
             if (state is ExamLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingList());
             }
             if (state is ExamLoaded) {
               return DropdownButtonFormField<int>(
@@ -166,7 +166,7 @@ class _DistributeHallsViewState extends State<_DistributeHallsView> {
         BlocBuilder<ExamHallAssignmentCubit, ExamHallAssignmentState>(
           builder: (context, state) {
             if (state is ExamHallAssignmentLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingList());
             }
             return ElevatedButton.icon(
               icon: const Icon(Icons.shuffle),

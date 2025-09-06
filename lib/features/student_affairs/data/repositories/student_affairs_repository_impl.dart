@@ -25,7 +25,7 @@ class StudentAffairsRepositoryImpl implements StudentAffairsRepository {
         final students = await remoteDataSource.getStudents();
         return Right(students);
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Left(ServerFailure(message: e.message.toString()));
       }
     } else {
       return Left(OfflineFailure());
@@ -45,7 +45,7 @@ class StudentAffairsRepositoryImpl implements StudentAffairsRepository {
         );
         return const Right(unit);
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Left(ServerFailure(message: e.message.toString()));
       }
     } else {
       return Left(OfflineFailure());
@@ -62,7 +62,7 @@ class StudentAffairsRepositoryImpl implements StudentAffairsRepository {
         await remoteDataSource.updateStudent(id: id, studentData: studentData);
         return const Right(unit);
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Left(ServerFailure(message: e.message.toString()));
       }
     } else {
       return Left(OfflineFailure());
@@ -76,7 +76,7 @@ class StudentAffairsRepositoryImpl implements StudentAffairsRepository {
         await remoteDataSource.deleteStudent(id: id);
         return const Right(unit);
       } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
+        return Left(ServerFailure(message: e.message.toString()));
       }
     } else {
       return Left(OfflineFailure());

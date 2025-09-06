@@ -131,10 +131,7 @@ class StudentDetailsScreen extends StatelessWidget {
                                   context,
                                 ).push<bool>(
                                   MaterialPageRoute(
-                                    builder:
-                                        (_) => AddEditStudentScreen(
-                                          student: student,
-                                        ),
+                                    builder: (_) => AddStudentScreen(),
                                   ),
                                 );
                                 if (result == true && context.mounted) {

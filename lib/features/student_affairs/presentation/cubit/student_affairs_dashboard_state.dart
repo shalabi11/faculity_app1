@@ -1,4 +1,6 @@
-part of 'student_affairs_dashboard_cubit.dart';
+// lib/features/student_affairs/presentation/cubit/student_affairs_dashboard_state.dart
+
+import 'package:equatable/equatable.dart';
 
 abstract class StudentAffairsDashboardState extends Equatable {
   const StudentAffairsDashboardState();
@@ -11,16 +13,14 @@ class StudentAffairsDashboardInitial extends StudentAffairsDashboardState {}
 class StudentAffairsDashboardLoading extends StudentAffairsDashboardState {}
 
 class StudentAffairsDashboardSuccess extends StudentAffairsDashboardState {
-  final Map<String, List<Student>> studentsByYear;
+  // ✨ --- 1. تم التعديل هنا --- ✨
+  // الآن يحتوي فقط على العدد الإجمالي للطلاب
+  final int totalStudents;
 
-  // ✨ تم حذف pendingStudentsCount من هنا
-  const StudentAffairsDashboardSuccess({required this.studentsByYear});
-
-  int get totalStudents =>
-      studentsByYear.values.fold(0, (sum, list) => sum + list.length);
+  const StudentAffairsDashboardSuccess({required this.totalStudents});
 
   @override
-  List<Object> get props => [studentsByYear];
+  List<Object> get props => [totalStudents];
 }
 
 class StudentAffairsDashboardFailure extends StudentAffairsDashboardState {
