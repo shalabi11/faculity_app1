@@ -288,8 +288,8 @@ class _AddEditExamViewState extends State<_AddEditExamView> {
       value: _selectedType,
       hint: const Text('اختر نوع الامتحان'),
       items: const [
-        DropdownMenuItem<String>(value: 'فصل اول ', child: Text('فصل اول ')),
-        DropdownMenuItem<String>(value: 'فصل ثاني', child: Text('فصل ثاني')),
+        DropdownMenuItem<String>(value: 'midterm', child: Text('فصل اول ')),
+        DropdownMenuItem<String>(value: 'final', child: Text('فصل ثاني')),
       ],
       onChanged: (String? newValue) {
         setState(() {

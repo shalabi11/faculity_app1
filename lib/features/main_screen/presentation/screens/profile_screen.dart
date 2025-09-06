@@ -41,12 +41,12 @@ class ProfileScreen extends StatelessWidget {
                     _InfoTile(
                       icon: Icons.person_pin_rounded,
                       title: 'الرقم الجامعي',
-                      value: user.id.toString(),
+                      value: '000',
                     ),
                     _InfoTile(
                       icon: Icons.class_outlined,
                       title: 'السنة الدراسية',
-                      value: user.year ?? 'غير محددة',
+                      value: user.year ?? 'الرابعة',
                     ),
                     _InfoTile(
                       icon: Icons.group_work_outlined,

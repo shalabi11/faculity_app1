@@ -269,8 +269,8 @@ class _LoginViewState extends State<_LoginView> {
                                             )
                                             : const Text('تسجيل الدخول'),
                                   ),
-                                  const SizedBox(height: 8),
-                                  _buildSignUpPrompt(context),
+                                  const SizedBox(height: 20),
+                                  // _buildSignUpPrompt(context),
                                 ],
                               ),
                             ),
@@ -315,25 +315,52 @@ class _WelcomeHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Hero(
-          tag: 'app-logo-hero',
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: 110,
-              height: 110,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12)],
-              ),
-            ),
-          ),
-        ).animate().fade(duration: 400.ms).scale(begin: const Offset(0.8, 0.8)),
-        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Image.asset('assets/images/it_logo.png', height: 80)
+                .animate()
+                .fade(delay: 200.ms, duration: 500.ms)
+                .slideY(begin: -0.5, curve: Curves.easeOut),
+            const Text(
+                  '        جامعة حلب \nكلية الهندسة المعلوماتية',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                )
+                .animate()
+                .fade(delay: 200.ms, duration: 500.ms)
+                .slideY(begin: -0.5, curve: Curves.easeOut),
+
+            Image.asset('assets/images/aleppo_univercity_logo.png', height: 80)
+                .animate()
+                .fade(delay: 200.ms, duration: 500.ms)
+                .slideY(begin: -0.5, curve: Curves.easeOut),
+          ],
+        ),
+
+        // Material(
+        //   color: Colors.transparent,
+        //   child: Container(
+        //     width: 110,
+        //     height: 110,
+        //     decoration: const BoxDecoration(
+        //       shape: BoxShape.circle,
+        //       color: Colors.white,
+        //       boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12)],
+        //     ),
+        //   ),
+        // ).animate().fade(duration: 400.ms).scale(begin: const Offset(0.8, 0.8)),
+        // const SizedBox(height: 16),
         const Text(
               'مرحباً بعودتك!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                // fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             )
             .animate()
             .fade(delay: 200.ms, duration: 500.ms)
@@ -341,7 +368,7 @@ class _WelcomeHeader extends StatelessWidget {
         const SizedBox(height: 4),
         const Text(
           'سجل الدخول للمتابعة',
-          style: TextStyle(color: Colors.black54),
+          style: TextStyle(color: Colors.black),
         ).animate().fade(delay: 400.ms, duration: 500.ms),
       ],
     );

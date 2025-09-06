@@ -97,7 +97,7 @@ class ExamRemoteDataSourceImpl implements ExamRemoteDataSource {
 
       await dio.post(
         '$baseUrl/api/exams/$id',
-        data: formData,
+        data: examData,
         options: await _getAuthHeaders(),
       );
     } on DioException catch (e) {
@@ -119,7 +119,7 @@ class ExamRemoteDataSourceImpl implements ExamRemoteDataSource {
       final formData = FormData.fromMap(examData);
       await dio.post(
         '$baseUrl/api/exams',
-        data: formData,
+        data: examData,
         options: await _getAuthHeaders(),
       );
     } on DioException catch (e) {
