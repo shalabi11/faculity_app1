@@ -96,11 +96,24 @@ Future<void> setupServiceLocator() async {
   // External & Core
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
-  sl.registerLazySingleton(() => Dio());
+  // sl.registerLazySingleton(() => Dio());
   sl.registerLazySingleton(() => const FlutterSecureStorage());
   sl.registerLazySingleton(() => InternetConnectionChecker.createInstance());
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
-
+  sl.registerLazySingleton(() {
+    final dio = Dio(
+      BaseOptions(
+        // ✨ 1. تمت إضافة هذا السطر
+        // هذا السطر يخبر dio بأن يعتبر أي حالة استجابة أقل من 500 ناجحة
+        validateStatus: (status) {
+          return status! < 500;
+        },
+      ),
+    );
+    // يمكنك إضافة الـ Interceptors هنا إذا احتجت
+    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+    return dio;
+  });
   // Theme
   sl.registerFactory<ThemeCubit>(() => ThemeCubit(sharedPreferences: sl()));
 

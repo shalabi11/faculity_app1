@@ -17,11 +17,23 @@ class HeadOfDepartmentDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // سنحتاج إلى قسم المستخدم لجلب البيانات الخاصة به
-    // سنفترض مؤقتاً أنه "برمجيات". لاحقاً، يجب أن تأتي هذه القيمة من كائن المستخدم
-    const String department = "برمجيات";
+    // ✨ --- 1. التأكد من أن المستخدم لديه قسم --- ✨
+    final String? department = user.department;
+
+    if (department == null) {
+      // حالة احترازية: إذا لم يتمكن التطبيق من جلب القسم
+      return Scaffold(
+        appBar: AppBar(title: const Text('خطأ')),
+        body: const Center(
+          child: Text(
+            'لم يتم تحديد القسم الخاص بك. يرجى تسجيل الخروج والمحاولة مرة أخرى.',
+          ),
+        ),
+      );
+    }
 
     return BlocProvider(
+      // ✨ --- 2. تمرير القسم الفعلي للمستخدم إلى الـ Cubit --- ✨
       create:
           (context) =>
               di.sl<HeadOfDepartmentDashboardCubit>()
@@ -48,6 +60,7 @@ class HeadOfDepartmentDashboardScreen extends StatelessWidget {
             ),
             body: RefreshIndicator(
               onRefresh: () async {
+                // ✨ --- 3. استخدام القسم الفعلي عند تحديث الصفحة --- ✨
                 context
                     .read<HeadOfDepartmentDashboardCubit>()
                     .fetchDashboardData(department);

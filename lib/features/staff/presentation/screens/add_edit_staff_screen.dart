@@ -1,255 +1,260 @@
-import 'package:faculity_app2/core/widget/app_state_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+// lib/features/staff/presentation/screens/add_edit_staff_screen.dart
+
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
 import 'package:faculity_app2/features/staff/domain/entities/staff_entity.dart';
 import 'package:faculity_app2/features/staff/presentation/cubit/manage_staff_cubit.dart';
 import 'package:faculity_app2/features/staff/presentation/cubit/manage_staff_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
-class AddEditStaffScreen extends StatelessWidget {
-  final StaffEntity? staffMember;
-  const AddEditStaffScreen({super.key, this.staffMember});
+class AddEditStaffScreen extends StatefulWidget {
+  final StaffEntity? staff;
+  final Map<String, dynamic>? initialData;
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => di.sl<ManageStaffCubit>(),
-      child: _AddEditStaffView(staffMember: staffMember),
-    );
-  }
-}
-
-class _AddEditStaffView extends StatefulWidget {
-  final StaffEntity? staffMember;
-  const _AddEditStaffView({this.staffMember});
+  const AddEditStaffScreen({super.key, this.staff, this.initialData});
 
   @override
-  State<_AddEditStaffView> createState() => _AddEditStaffViewState();
+  State<AddEditStaffScreen> createState() => _AddEditStaffScreenState();
 }
 
-class _AddEditStaffViewState extends State<_AddEditStaffView> {
+class _AddEditStaffScreenState extends State<AddEditStaffScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _fullNameController;
-  late TextEditingController _motherNameController;
-  late TextEditingController _departmentController;
-  late TextEditingController _academicDegreeController;
-  late TextEditingController _birthPlaceController;
-  DateTime? _selectedBirthDate;
-  DateTime? _selectedEmploymentDate;
 
-  bool get isEditMode => widget.staffMember != null;
+  final _fullNameController = TextEditingController();
+  final _motherNameController = TextEditingController();
+  final _birthDateController = TextEditingController();
+  final _birthPlaceController = TextEditingController();
+  final _academicDegreeController = TextEditingController();
+  final _departmentController = TextEditingController();
+  final _employmentDateController = TextEditingController();
+
+  int? _userId;
 
   @override
   void initState() {
     super.initState();
-    _fullNameController = TextEditingController(
-      text: widget.staffMember?.fullName ?? '',
-    );
-    _motherNameController = TextEditingController(
-      text: widget.staffMember?.motherName ?? '',
-    );
-    _departmentController = TextEditingController(
-      text: widget.staffMember?.department ?? '',
-    );
-    _academicDegreeController = TextEditingController(
-      text: widget.staffMember?.academicDegree ?? '',
-    );
-    _birthPlaceController = TextEditingController(
-      text: widget.staffMember?.birthPlace ?? '',
-    );
-    _selectedBirthDate =
-        widget.staffMember != null
-            ? DateTime.tryParse(widget.staffMember!.birthDate)
-            : null;
-    _selectedEmploymentDate =
-        widget.staffMember != null
-            ? DateTime.tryParse(widget.staffMember!.employmentDate)
-            : null;
+    if (widget.initialData != null) {
+      _userId = widget.initialData!['user_id'];
+      _fullNameController.text = widget.initialData!['name'] ?? '';
+      _departmentController.text = _mapDepartment(
+        widget.initialData!['department'],
+      );
+    } else if (widget.staff != null) {
+      _userId = widget.staff!.userId;
+      _fullNameController.text = widget.staff!.fullName;
+      _motherNameController.text = widget.staff!.motherName;
+      _birthDateController.text = widget.staff!.birthDate;
+      _birthPlaceController.text = widget.staff!.birthPlace;
+      _academicDegreeController.text = widget.staff!.academicDegree;
+      _departmentController.text = widget.staff!.department;
+      _employmentDateController.text = widget.staff!.employmentDate;
+    }
+  }
+
+  String _mapDepartment(String? code) {
+    switch (code) {
+      case 'SE':
+        return 'هندسة البرمجيات';
+      case 'AI':
+        return 'الذكاء الصنعي';
+      case 'NE':
+        return 'الشبكات';
+      default:
+        return code ?? '';
+    }
   }
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _motherNameController.dispose();
-    _departmentController.dispose();
-    _academicDegreeController.dispose();
+    _birthDateController.dispose();
     _birthPlaceController.dispose();
+    _academicDegreeController.dispose();
+    _departmentController.dispose();
+    _employmentDateController.dispose();
     super.dispose();
   }
 
-  void _submitForm() {
-    // التحقق من صحة النموذج والتواريخ
-    if (_formKey.currentState!.validate() &&
-        (_selectedBirthDate != null && _selectedEmploymentDate != null)) {
-      final staffData = {
-        'full_name': _fullNameController.text,
-        'mother_name': _motherNameController.text,
-        'birth_place': _birthPlaceController.text,
-        'department': _departmentController.text,
-        'academic_degree': _academicDegreeController.text,
-        'birth_date': _selectedBirthDate!.toIso8601String().substring(0, 10),
-        'employment_date': _selectedEmploymentDate!.toIso8601String().substring(
-          0,
-          10,
-        ),
-      };
-      if (isEditMode) {
-        context.read<ManageStaffCubit>().updateStaff(
-          widget.staffMember!.id,
-          staffData,
-        );
-      } else {
-        context.read<ManageStaffCubit>().addStaff(staffData);
-      }
-    } else {
-      // إظهار رسالة إذا كانت التواريخ غير محددة
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('يرجى ملء جميع الحقول واختيار التواريخ'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    }
-  }
-
-  Future<void> _pickDate(bool isBirthDate) async {
-    final DateTime? pickedDate = await showDatePicker(
+  Future<void> _selectDate(
+    BuildContext context,
+    TextEditingController controller,
+  ) async {
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
     );
-    if (pickedDate != null) {
+    if (picked != null) {
       setState(() {
-        if (isBirthDate) {
-          _selectedBirthDate = pickedDate;
-        } else {
-          _selectedEmploymentDate = pickedDate;
-        }
+        controller.text = DateFormat('yyyy-MM-dd').format(picked);
       });
+    }
+  }
+
+  void _saveStaff() {
+    if (_formKey.currentState!.validate()) {
+      final staffData = {
+        // ✨ التأكد من إرسال user_id
+        'user_id': _userId.toString(),
+        'full_name': _fullNameController.text.trim(),
+        'mother_name': _motherNameController.text.trim(),
+        'birth_date': _birthDateController.text.trim(),
+        'birth_place': _birthPlaceController.text.trim(),
+        'academic_degree': _academicDegreeController.text.trim(),
+        'department': _departmentController.text.trim(),
+        'employment_date': _employmentDateController.text.trim(),
+      };
+      if (widget.staff == null) {
+        context.read<ManageStaffCubit>().addStaff(staffData);
+      } else {
+        context.read<ManageStaffCubit>().updateStaff(
+          widget.staff!.id,
+          staffData,
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditMode ? 'تعديل بيانات الموظف' : 'إضافة موظف جديد'),
-      ),
-      body: BlocListener<ManageStaffCubit, ManageStaffState>(
-        listener: (context, state) {
-          if (state is ManageStaffSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('تمت العملية بنجاح!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.pop(context, true);
-          } else if (state is ManageStaffFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('فشل: ${state.message}'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              children: [
-                TextFormField(
-                  controller: _fullNameController,
-                  decoration: const InputDecoration(labelText: 'الاسم الكامل'),
-                  validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _motherNameController,
-                  decoration: const InputDecoration(labelText: 'اسم الأم'),
-                  validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _birthPlaceController,
-                  decoration: const InputDecoration(labelText: 'مكان الولادة'),
-                  validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _departmentController,
-                  decoration: const InputDecoration(labelText: 'القسم'),
-                  validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _academicDegreeController,
-                  decoration: const InputDecoration(
-                    labelText: 'الشهادة العلمية',
-                  ),
-                  validator: (v) => v!.isEmpty ? 'الحقل مطلوب' : null,
-                ),
-                const SizedBox(height: 16),
-                _buildDatePicker(
-                  context,
-                  'تاريخ الميلاد',
-                  _selectedBirthDate,
-                  () => _pickDate(true),
-                ),
-                const SizedBox(height: 16),
-                _buildDatePicker(
-                  context,
-                  'تاريخ التوظيف',
-                  _selectedEmploymentDate,
-                  () => _pickDate(false),
-                ),
-                const SizedBox(height: 24),
-                BlocBuilder<ManageStaffCubit, ManageStaffState>(
-                  builder: (context, state) {
-                    if (state is ManageStaffLoading) {
-                      return const Center(child: LoadingList());
-                    }
-                    return ElevatedButton(
-                      onPressed: _submitForm,
-                      child: Text(isEditMode ? 'حفظ التعديلات' : 'حفظ الموظف'),
-                    );
-                  },
-                ),
-              ],
-            ),
+    return BlocProvider(
+      create: (context) => di.sl<ManageStaffCubit>(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.staff == null ? 'إضافة بيانات موظف' : 'تعديل بيانات موظف',
           ),
+        ),
+        body: BlocConsumer<ManageStaffCubit, ManageStaffState>(
+          listener: (context, state) {
+            if (state is ManageStaffSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.toString()),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              int count = 0;
+              Navigator.of(context).popUntil(
+                (_) => count++ >= (widget.initialData != null ? 2 : 1),
+              );
+            } else if (state is ManageStaffFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('فشل العملية: ${state.message}'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            final isLoading = state is ManageStaffLoading;
+            return Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildTextField(
+                      controller: _fullNameController,
+                      label: 'الاسم الكامل',
+                      readOnly: widget.initialData != null,
+                    ),
+                    _buildTextField(
+                      controller: _motherNameController,
+                      label: 'اسم الأم',
+                    ),
+                    _buildDateField(
+                      context,
+                      _birthDateController,
+                      'تاريخ الميلاد',
+                    ),
+                    _buildTextField(
+                      controller: _birthPlaceController,
+                      label: 'مكان الولادة',
+                    ),
+                    _buildTextField(
+                      controller: _academicDegreeController,
+                      label: 'الدرجة العلمية',
+                    ),
+                    _buildTextField(
+                      controller: _departmentController,
+                      label: 'القسم',
+                      readOnly: widget.initialData != null,
+                    ),
+                    _buildDateField(
+                      context,
+                      _employmentDateController,
+                      'تاريخ التوظيف',
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: isLoading ? null : _saveStaff,
+                      child:
+                          isLoading
+                              ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                              : const Text('حفظ البيانات'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildDatePicker(
-    BuildContext context,
-    String label,
-    DateTime? date,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      child: InputDecorator(
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool readOnly = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: TextFormField(
+        controller: controller,
+        readOnly: readOnly,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
+          fillColor: readOnly ? Colors.grey.shade200 : null,
+          filled: readOnly,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              date != null
-                  ? '${date.year}/${date.month}/${date.day}'
-                  : 'اختر تاريخاً',
-            ),
-            const Icon(Icons.calendar_today),
-          ],
+        validator:
+            (value) =>
+                (value == null || value.trim().isEmpty)
+                    ? 'هذا الحقل مطلوب'
+                    : null,
+      ),
+    );
+  }
+
+  Widget _buildDateField(
+    BuildContext context,
+    TextEditingController controller,
+    String label,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: TextFormField(
+        controller: controller,
+        readOnly: true,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          suffixIcon: const Icon(Icons.calendar_today),
         ),
+        onTap: () => _selectDate(context, controller),
+        validator:
+            (value) =>
+                (value == null || value.isEmpty) ? 'هذا الحقل مطلوب' : null,
       ),
     );
   }

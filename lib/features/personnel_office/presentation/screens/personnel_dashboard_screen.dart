@@ -3,6 +3,8 @@
 import 'package:faculity_app2/core/services/service_locator.dart' as di;
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:faculity_app2/features/auth/presentation/cubit/auth_state.dart';
+// ✨ --- 1. استيراد شاشة إنشاء الحساب --- ✨
+import 'package:faculity_app2/features/personnel_office/presentation/screens/create_user_account_screen.dart';
 import 'package:faculity_app2/features/teachers/presentation/cubit/teacher_state.dart';
 import 'package:faculity_app2/features/personnel_office/presentation/screens/personnel_profile_screen.dart';
 import 'package:faculity_app2/features/staff/presentation/cubit/staff_cubit.dart';
@@ -17,8 +19,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class PersonnelDashboardScreen extends StatelessWidget {
   const PersonnelDashboardScreen({super.key});
 
-  // ✨ --- 1. إنشاء دالة لتحديث البيانات --- ✨
-  // هذه الدالة ستُستخدم عند السحب للتحديث وعند العودة من شاشة أخرى
   void _refreshData(BuildContext context) {
     context.read<TeacherCubit>().fetchTeachers();
     context.read<StaffCubit>().fetchStaff();
@@ -33,7 +33,6 @@ class PersonnelDashboardScreen extends StatelessWidget {
         ),
         BlocProvider(create: (context) => di.sl<StaffCubit>()..fetchStaff()),
       ],
-      // ✨ --- 2. استخدام Builder للحصول على context صحيح --- ✨
       child: Builder(
         builder: (context) {
           return Scaffold(
@@ -86,15 +85,12 @@ class PersonnelDashboardScreen extends StatelessWidget {
                               color: Colors.orange.shade700,
                               state: state,
                               onTap: () {
-                                // ✨ --- 3. تعديل onTap هنا --- ✨
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => const TeacherListScreen(),
                                   ),
-                                ).then(
-                                  (_) => _refreshData(context),
-                                ); // تحديث البيانات عند العودة
+                                ).then((_) => _refreshData(context));
                               },
                             );
                           },
@@ -108,21 +104,21 @@ class PersonnelDashboardScreen extends StatelessWidget {
                               color: Colors.blue.shade700,
                               state: state,
                               onTap: () {
-                                // ✨ --- 4. تعديل onTap هنا --- ✨
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => const StaffListScreen(),
                                   ),
-                                ).then(
-                                  (_) => _refreshData(context),
-                                ); // تحديث البيانات عند العودة
+                                ).then((_) => _refreshData(context));
                               },
                             );
                           },
                         ),
                       ],
                     ),
+                    const SizedBox(height: 24),
+                    // ✨ --- 2. إضافة قسم الإجراءات --- ✨
+                    _buildActionsSection(context),
                     const SizedBox(height: 24),
                     _buildStatsChartCard(),
                   ],
@@ -132,6 +128,43 @@ class PersonnelDashboardScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  // ✨ --- 3. ويدجت جديد لقسم الإجراءات --- ✨
+  Widget _buildActionsSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'الإجراءات',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ListTile(
+            leading: Icon(Icons.person_add, color: Colors.green.shade700),
+            title: const Text(
+              'إنشاء حساب جديد',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: const Text('إضافة دكتور أو موظف جديد إلى النظام'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CreateUserAccountScreen(),
+                ),
+              ).then((_) => _refreshData(context)); // تحديث عند العودة
+            },
+          ),
+        ),
+      ],
     );
   }
 

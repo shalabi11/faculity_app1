@@ -1,7 +1,11 @@
+// lib/features/staff/domain/entities/staff_entity.dart
+
 import 'package:equatable/equatable.dart';
 
 class StaffEntity extends Equatable {
   final int id;
+  // ✨ 1. إضافة userId
+  final int userId;
   final String fullName;
   final String motherName;
   final String birthDate;
@@ -12,6 +16,7 @@ class StaffEntity extends Equatable {
 
   const StaffEntity({
     required this.id,
+    required this.userId,
     required this.fullName,
     required this.motherName,
     required this.birthDate,
@@ -24,6 +29,7 @@ class StaffEntity extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    userId,
     fullName,
     motherName,
     birthDate,

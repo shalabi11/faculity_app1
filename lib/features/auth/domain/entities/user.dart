@@ -1,17 +1,16 @@
 import 'package:equatable/equatable.dart';
 
-// تمت إضافة extends Equatable لجعل مقارنة الكائنات أسهل وأكثر فعالية
 class User extends Equatable {
   final int id;
   final String name;
   final String email;
-  final String role; // تم تعديله ليكون final لمزيد من الأمان
+  final String role;
   final String? token;
   final String? year;
   final String? section;
   final String? universityId;
+  final String? department;
 
-  // تم تعديل الـ constructor ليناسب final role
   const User({
     required this.id,
     required this.name,
@@ -21,13 +20,46 @@ class User extends Equatable {
     this.year,
     this.section,
     this.universityId,
+    this.department,
   });
 
-  // --- ✅ هذا هو التعديل المطلوب ✅ ---
-  // الآن، الدالة تتحقق من قيمة حقل role بشكل صحيح
+  // ✨ --- تمت إضافة دالة copyWith هنا --- ✨
+  User copyWith({
+    int? id,
+    String? name,
+    String? email,
+    String? role,
+    String? token,
+    String? year,
+    String? section,
+    String? universityId,
+    String? department,
+  }) {
+    return User(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      token: token ?? this.token,
+      year: year ?? this.year,
+      section: section ?? this.section,
+      universityId: universityId ?? this.universityId,
+      department: department ?? this.department,
+    );
+  }
+
   bool get isAdmin => role == 'admin';
 
-  // props ضرورية لعمل Equatable بشكل صحيح
   @override
-  List<Object?> get props => [id, name, email, role, token, year, section];
+  List<Object?> get props => [
+    id,
+    name,
+    email,
+    role,
+    token,
+    year,
+    section,
+    universityId,
+    department,
+  ];
 }

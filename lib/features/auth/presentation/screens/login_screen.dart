@@ -21,6 +21,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../cubit/login_cubit.dart';
 import '../../domain/entities/user.dart';
 
+const Map<String, String> _departmentsMap = {
+  'هندسة البرمجيات': 'SE',
+  'الذكاء الصنعي': 'AI',
+  'الشبكات': 'NE',
+};
+
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -46,6 +52,7 @@ class _LoginViewState extends State<_LoginView> {
   final _passwordController = TextEditingController();
   final _extraFieldController = TextEditingController();
   String _selectedRole = 'student';
+  String? _selectedDepartmentForHOD;
 
   @override
   void dispose() {
@@ -58,6 +65,7 @@ class _LoginViewState extends State<_LoginView> {
   void _onRoleChanged(String newRole) {
     if (_selectedRole != newRole) {
       _extraFieldController.clear();
+      _selectedDepartmentForHOD = null;
       setState(() {
         _selectedRole = newRole;
       });
@@ -66,19 +74,42 @@ class _LoginViewState extends State<_LoginView> {
 
   void _login() {
     if (_formKey.currentState!.validate()) {
-      // ✨ --- تم التعديل الكامل هنا --- ✨
+      if (_selectedRole == 'head_of_department' &&
+          _selectedDepartmentForHOD == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('الرجاء اختيار القسم'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // ✨ --- التصحيح الرئيسي هنا --- ✨
       String apiRole;
-      if (_selectedRole == 'student') {
-        apiRole = 'student';
+      // قائمة الأدوار التي تعتبر "admin" من جهة الخادم
+      const adminRoles = [
+        'admin',
+        'head_of_department',
+        'studentAffairs',
+        'personnel_office',
+        'exams',
+        'head_of_exam',
+        'dean', // إضافة أي أدوار إدارية أخرى هنا
+      ];
+
+      if (adminRoles.contains(_selectedRole)) {
+        apiRole = 'admin';
       } else if (_selectedRole == 'teacher') {
-        apiRole = 'teacher'; // دور الدكتور يرسل كـ "teacher"
+        apiRole = 'teacher';
       } else {
-        apiRole = 'admin'; // بقية الأدوار الإدارية ترسل كـ "admin"
+        apiRole = 'student';
       }
 
       final extraFieldConfig = _extraFieldConfig[_selectedRole];
       final Map<String, dynamic> data = {
         'role': apiRole,
+        'original_role': _selectedRole,
         'email': _emailController.text.trim(),
         'password': _passwordController.text.trim(),
       };
@@ -86,12 +117,17 @@ class _LoginViewState extends State<_LoginView> {
       if (extraFieldConfig != null) {
         data[extraFieldConfig['name']] = _extraFieldController.text.trim();
       }
-      context.read<LoginCubit>().login(data: data);
+
+      context.read<LoginCubit>().login(
+        data: data,
+        department: _selectedDepartmentForHOD,
+      );
     }
   }
 
   void _navigateByRole(BuildContext context, String selectedRole, User user) {
     Widget screen;
+    // التوجيه يعتمد على الدور المختار في الواجهة وليس القادم من الـ API
     switch (selectedRole) {
       case 'admin':
         screen = AdminDashboardScreen(user: user);
@@ -114,6 +150,7 @@ class _LoginViewState extends State<_LoginView> {
       case 'head_of_exam':
         screen = HeadOfExamsDashboardScreen(user: user);
         break;
+      // ✨ هذا هو التوجيه الصحيح لرئيس القسم
       case 'head_of_department':
         screen = HeadOfDepartmentDashboardScreen(user: user);
         break;
@@ -186,6 +223,45 @@ class _LoginViewState extends State<_LoginView> {
                                     onRoleSelected: _onRoleChanged,
                                   ),
                                   const SizedBox(height: 20),
+
+                                  // ✨ --- إضافة القائمة المنسدلة للأقسام --- ✨
+                                  if (_selectedRole == 'head_of_department')
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 12.0,
+                                      ),
+                                      child: DropdownButtonFormField<String>(
+                                        value: _selectedDepartmentForHOD,
+                                        isExpanded: true,
+                                        decoration: const InputDecoration(
+                                          labelText: 'القسم',
+                                          prefixIcon: Icon(
+                                            Icons.business_center_outlined,
+                                          ),
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        items:
+                                            _departmentsMap.entries.map((
+                                              entry,
+                                            ) {
+                                              return DropdownMenuItem(
+                                                value: entry.value,
+                                                child: Text(entry.key),
+                                              );
+                                            }).toList(),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _selectedDepartmentForHOD = value;
+                                          });
+                                        },
+                                        validator:
+                                            (value) =>
+                                                value == null
+                                                    ? 'الرجاء اختيار القسم'
+                                                    : null,
+                                      ),
+                                    ),
+
                                   TextFormField(
                                     controller: _emailController,
                                     textAlign: TextAlign.right,
