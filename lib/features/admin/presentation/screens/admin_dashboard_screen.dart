@@ -102,7 +102,18 @@ class AdminDashboardScreen extends StatelessWidget {
       DashboardItem(
         title: 'إدارة الجداول',
         icon: Icons.schedule_outlined,
-        onTap: () => _navigateTo(context, const ManageSchedulesScreen()),
+        onTap:
+            () => _navigateTo(
+              context,
+              ManageSchedulesScreen(
+                appBar: AppBar(
+                  title: const Text('إدارة الجداول الدراسية'),
+                  // bottom: const TabBar(
+                  //   tabs: [Tab(text: 'نظري'), Tab(text: 'عملي')],
+                  // ),
+                ),
+              ),
+            ),
       ),
       DashboardItem(
         title: 'إدارة الامتحانات',

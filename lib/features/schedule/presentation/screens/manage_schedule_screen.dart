@@ -10,17 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ManageSchedulesScreen extends StatelessWidget {
-  const ManageSchedulesScreen({super.key});
-
+  const ManageSchedulesScreen({super.key, required this.appBar});
+  final AppBar appBar;
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('إدارة الجداول الدراسية'),
-          bottom: const TabBar(tabs: [Tab(text: 'نظري'), Tab(text: 'عملي')]),
-        ),
+        appBar: appBar,
         body: const TabBarView(
           children: [
             _ScheduleView(isTheory: true),

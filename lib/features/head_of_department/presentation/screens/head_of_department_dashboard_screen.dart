@@ -161,7 +161,17 @@ class HeadOfDepartmentDashboardScreen extends StatelessWidget {
             _ActionCard(
               'عرض الجداول',
               Icons.schedule_outlined,
-              () => _navigateTo(context, const ManageSchedulesScreen()),
+              () => _navigateTo(
+                context,
+                ManageSchedulesScreen(
+                  appBar: AppBar(
+                    title: const Text('إدارة الجداول الدراسية'),
+                    // bottom: const TabBar(
+                    //   tabs: [Tab(text: 'نظري'), Tab(text: 'عملي')],
+                    // ),
+                  ),
+                ),
+              ),
             ),
             _ActionCard(
               'عرض الامتحانات',

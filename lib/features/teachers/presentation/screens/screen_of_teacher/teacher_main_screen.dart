@@ -109,12 +109,12 @@ class _TeacherMainScreenViewState extends State<_TeacherMainScreenView> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_appBarTitles[_selectedIndex]),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none_rounded),
-          ).animate().fade().slideX(),
-        ],
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {},
+        //     icon: const Icon(Icons.notifications_none_rounded),
+        //   ).animate().fade().slideX(),
+        // ],
       ),
       body: PageView(
         controller: _pageController,
